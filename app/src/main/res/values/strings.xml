@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">IntentRecognitionChatApplication</string>
+    <string name="title_activity_main">MainActivity</string>
 </resources>
