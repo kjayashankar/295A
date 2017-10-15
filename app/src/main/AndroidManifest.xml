@@ -20,8 +20,13 @@
             </intent-filter>
         </activity>
         <activity android:name=".ManageFriendsActivity" />
-        <activity android:name=".ChatFriendsActivity" android:theme="@style/AppTheme.NoActionBar"/>
-        <activity android:name=".TalkToFriendActivity" android:theme="@style/AppTheme.NoActionBar"/>
+        <activity
+            android:name=".ChatFriendsActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".TalkToFriendActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".LoginActivity"></activity>
     </application>
 
 </manifest>
