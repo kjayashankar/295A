@@ -15,5 +15,17 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
     }
+
+    public void localLogin(View view){
+
+    }
+
+    public void facebookLogin(View view){
+
+    }
+
+    public void googleLogin(View view){
+
+    }
 }
 
