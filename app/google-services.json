@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "893512106745",
+    "project_id": "chatbot-intent-recognition"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:893512106745:android:52a704a27cebb9a2",
+        "android_client_info": {
+          "package_name": "edu.sjsu.intentrecognitionchatapplication"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "893512106745-achf7vqgju3s0uq324c318tmgkairk22.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "edu.sjsu.intentrecognitionchatapplication",
+            "certificate_hash": "0da9fc1380746aa3f8d978f47647d72a219b2fb5"
+          }
+        },
+        {
+          "client_id": "893512106745-veadtqorvcuurg2ehk9jh6un7gs453po.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDqghP3iEJlvU6x7uuZW9JsHDYzmP-huPs"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
