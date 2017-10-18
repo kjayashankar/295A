@@ -35,7 +35,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private GoogleApiClient googleApiClient;
     private EditText inputUserName, inputPassword;
     private static final int REQ_CODE = 9001;
-    AlertDialog.Builder alertBuilder;
+    private AlertDialog.Builder alertBuilder;
     SessionManager session;
 
     @Override
@@ -71,7 +71,39 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private void doLocalLogin(){
-        
+        String userName = inputUserName.getText().toString();
+        String password = inputPassword.getText().toString();
+        if(userName == null || password == null){
+            return;
+        }
+
+        if(userName.trim().length()>0 && password.trim().length()>0){
+            if(userName.equals("satya") && password.equals("satya")){
+                session.createLoginSession(userName, userName, null);
+                Intent intent = new Intent(getApplicationContext(), UserProfileActivity.class);
+                startActivity(intent);
+            }else{
+                alertBuilder = new AlertDialog.Builder(this);
+                alertBuilder.setTitle("Login Failed")
+                        .setMessage("Incorrect Username/Password")
+                        .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                            }
+                        }).setIcon(R.drawable.delete1).show();
+            }
+        }else{
+            alertBuilder = new AlertDialog.Builder(this);
+            alertBuilder.setTitle("Invalid Input")
+                    .setMessage("Please enter Username & Password")
+                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    }).setIcon(R.drawable.delete1).show();
+        }
 
     }
 
@@ -108,7 +140,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             String name = account.getDisplayName();
             String email = account.getEmail();
             String picURL = account.getPhotoUrl().toString();
-            //Glide.with(this).load(picURL).into(profilePic);
             session.createLoginSession(name, email, picURL);
             Intent intent = new Intent(getApplicationContext(), UserProfileActivity.class);
             startActivity(intent);
