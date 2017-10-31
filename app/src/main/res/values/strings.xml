@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">IntentRecognitionChatApplication</string>
     <string name="title_activity_main">MainActivity</string>
-    <string name="login_username">Enter your Email ID</string>
-    <string name="login_password">Enter your Password</string>
+    <string name="login_username">Email ID</string>
+    <string name="login_password">Password</string>
     <string name="facebook_app_id">340366323100771</string>
     <string name="fb_login_protocol_scheme">fb340366323100771</string>
 </resources>

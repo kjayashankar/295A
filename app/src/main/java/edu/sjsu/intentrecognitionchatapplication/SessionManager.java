@@ -23,6 +23,7 @@ public class SessionManager {
     public static final String NAME = "name";
     public static final String EMAIL = "email";
     public static final String PHOTO_URL = "photoURL";
+    public static final String LOCAL_LOGIN = "IsLocallyLoggedIn";
 
     public SessionManager(Context context){
         this.context = context;
@@ -31,15 +32,16 @@ public class SessionManager {
     }
 
     // Creating login Session
-    public void createLoginSession(String name, String email, String photoURL){
+    public void createLoginSession(String name, String email, String photoURL, boolean localLogin){
         editor.putBoolean(IS_LOGIN, true);
         editor.putString(NAME, name);
         editor.putString(EMAIL, email);
         editor.putString(PHOTO_URL, photoURL);
+        editor.putBoolean(LOCAL_LOGIN, localLogin);
         editor.commit();
     }
 
-    // Return Stored Session Data
+    // Return Stored User Session Data
     public HashMap<String, String> getUserDetails(){
         HashMap<String, String> user = new HashMap<String, String>();
         user.put(NAME, prefs.getString(NAME, null));
@@ -63,5 +65,8 @@ public class SessionManager {
     public boolean isLoggedIn(){
         return prefs.getBoolean(IS_LOGIN, false);
     }
+
+    // Get Login Action
+    public boolean isLocalLogin(){return prefs.getBoolean(LOCAL_LOGIN, false);}
 
 }

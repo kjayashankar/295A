@@ -16,11 +16,20 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.bumptech.glide.Glide;
+import com.facebook.AccessToken;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.FacebookSdk;
+import com.facebook.login.LoginManager;
+import com.facebook.login.LoginResult;
+import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
@@ -31,55 +40,77 @@ import com.google.android.gms.common.api.Status;
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener, GoogleApiClient.OnConnectionFailedListener {
 
-    private Button localLogin, fbLogin, googleLogin;
+    private Button localLogin;
+    private SignInButton googleLogin;
+    private LoginButton fbLogin;
     private GoogleApiClient googleApiClient;
+    private CallbackManager callbackManager;
     private EditText inputUserName, inputPassword;
     private static final int REQ_CODE = 9001;
     private AlertDialog.Builder alertBuilder;
-    SessionManager session;
+    public static SessionManager session;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        session = new SessionManager(getApplicationContext());
-        localLogin = (Button) findViewById(R.id.bn_local_login);
-        fbLogin = (Button) findViewById(R.id.bn_fb_login);
-        googleLogin = (Button) findViewById(R.id.bn_google_login);
+
         inputUserName = (EditText) findViewById(R.id.user_name);
         inputPassword = (EditText) findViewById(R.id.user_password);
+        localLogin = (Button) findViewById(R.id.bn_local_login);
+        fbLogin = (LoginButton) findViewById(R.id.bn_fb_login);
+        googleLogin = (SignInButton) findViewById(R.id.bn_google_login);
+
+        //Local Auth Setup
+        session = new SessionManager(getApplicationContext());
         localLogin.setOnClickListener(this);
-        fbLogin.setOnClickListener(this);
-        googleLogin.setOnClickListener(this);
+
+        //Google Auth Setup
         GoogleSignInOptions signInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail().build();
         googleApiClient = new GoogleApiClient.Builder(this).enableAutoManage(this, this).addApi(Auth.GOOGLE_SIGN_IN_API, signInOptions).build();
+        googleLogin.setOnClickListener(this);
+
+        //FB Auth Setup
+        callbackManager = CallbackManager.Factory.create();
+        doFacebookLogin();
+
+
     }
 
     @Override
     public void onClick(View view){
         switch(view.getId()){
+            case R.id.bn_local_login :
+                doLocalLogin();
+                break;
             case R.id.bn_google_login :
                 doGoogleLogin();
                 break;
-            case R.id.bn_fb_login :
-                doFacebookLogin();
-                break;
-            case R.id.bn_local_login :
-                doLocalLogin();
+            case R.id.bn_logout :
+                doLogout();
                 break;
         }
     }
 
+    private void doLogout(){
+        if(session.isLocalLogin()){
+            session.logoutUser();
+        }else if(AccessToken.getCurrentAccessToken() != null){
+            LoginManager.getInstance().logOut();
+            session.logoutUser();
+        }else{
+            doGoogleLogout();
+        }
+    }
+
+    ////////// Local Authentication
     private void doLocalLogin(){
         String userName = inputUserName.getText().toString();
         String password = inputPassword.getText().toString();
-        if(userName == null || password == null){
-            return;
-        }
 
         if(userName.trim().length()>0 && password.trim().length()>0){
             if(userName.equals("satya") && password.equals("satya")){
-                session.createLoginSession(userName, userName, null);
+                session.createLoginSession(userName, userName, null, true);
                 Intent intent = new Intent(getApplicationContext(), UserProfileActivity.class);
                 startActivity(intent);
             }else{
@@ -107,8 +138,28 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     }
 
+    ////////// Facebook Authentication
     private void doFacebookLogin(){
+        fbLogin.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+            @Override
+            public void onSuccess(LoginResult loginResult) {
+                String name = loginResult.getAccessToken().getUserId();
+                String email = loginResult.getAccessToken().getToken();
+                session.createLoginSession(name, email, null, false);
+                Intent intent = new Intent(getApplicationContext(), UserProfileActivity.class);
+                startActivity(intent);
+            }
 
+            @Override
+            public void onCancel() {
+
+            }
+
+            @Override
+            public void onError(FacebookException error) {
+
+            }
+        });
     }
 
     ////////// Google Authentication
@@ -117,20 +168,13 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         startActivityForResult(intent, REQ_CODE);
     }
 
-    private void doGoogleLogout(){
-        Auth.GoogleSignInApi.signOut(googleApiClient).setResultCallback(new ResultCallback<Status>() {
-            @Override
-            public void onResult(@NonNull Status status) {
-                // success logout
-            }
-        });
-    }
-
     protected void onActivityResult(int requestCode, int resultCode, Intent data){
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQ_CODE) {
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             handleResult(result);
+        }else{
+            callbackManager.onActivityResult(requestCode, resultCode, data);
         }
     }
 
@@ -140,7 +184,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             String name = account.getDisplayName();
             String email = account.getEmail();
             String picURL = account.getPhotoUrl().toString();
-            session.createLoginSession(name, email, picURL);
+            session.createLoginSession(name, email, picURL, false);
             Intent intent = new Intent(getApplicationContext(), UserProfileActivity.class);
             startActivity(intent);
         }
@@ -148,6 +192,16 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     public void onConnectionFailed(@NonNull ConnectionResult result){
 
+    }
+
+    public void doGoogleLogout(){
+        Auth.GoogleSignInApi.signOut(googleApiClient).setResultCallback(new ResultCallback<Status>() {
+            @Override
+            public void onResult(@NonNull Status status) {
+                // success logout
+                session.logoutUser();
+            }
+        });
     }
 
 }
