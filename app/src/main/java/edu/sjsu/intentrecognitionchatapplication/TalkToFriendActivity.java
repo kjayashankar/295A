@@ -22,6 +22,11 @@ import android.widget.TextView;
 import org.json.JSONArray;
 
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.util.Locale;
+
+import edu.sjsu.intentrecognitionchatapplication.websockets.WebSocketClient;
 
 public class TalkToFriendActivity extends AppCompatActivity {
 
@@ -62,6 +67,8 @@ public class TalkToFriendActivity extends AppCompatActivity {
         friendText.setText(friendName);
 
         context = this;
+        setWebSockets();
+
         onStart();
     }
 
@@ -204,4 +211,61 @@ public class TalkToFriendActivity extends AppCompatActivity {
             capturePicture.setBackgroundResource(R.drawable.click3);
         }
     }
+
+    private void setWebSockets() {
+        WebSocketClient client = new WebSocketClient(URI.create("http://10.0.0.98:8080/IntentChatServer/chat"), new WebSocketClient.Listener() {
+            @Override
+            public void onConnect() {
+                Log.d("TAG", "connection opened");
+
+            }
+
+            /**
+             * On receiving the message from web socket server
+             * */
+            @Override
+            public void onMessage(String message) {
+                Log.d("TAG", String.format("Got string message! %s", message));
+
+                //parseMessage(message);
+
+            }
+
+            @Override
+            public void onMessage(byte[] data) {
+                Log.d("TAG", String.format("Got binary message! %s"
+                        ));
+
+                // Message will be in JSON format
+                //parseMessage(bytesToHex(data));
+            }
+
+            /**
+             * Called when the connection is terminated
+             * */
+            @Override
+            public void onDisconnect(int code, String reason) {
+
+                String message = String.format(Locale.US,
+                        "Disconnected! Code: %d Reason: %s", code, reason);
+
+                //showToast(message);
+
+                // clear the session id from shared preferences
+                //utils.storeSessionId(null);
+            }
+
+            @Override
+            public void onError(Exception error) {
+                Log.e("TAG", "Error! : " + error.getMessage());
+                Log.e("TAG","err",error.fillInStackTrace());
+
+               // showToast("Error! : " + error);
+            }
+
+        }, null);
+
+        client.connect();
+    }
+
 }
