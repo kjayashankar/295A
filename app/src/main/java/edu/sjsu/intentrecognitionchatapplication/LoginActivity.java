@@ -115,28 +115,23 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 startActivity(intent);
                 Toast.makeText(getApplicationContext(), "Logging In..", Toast.LENGTH_SHORT).show();
             }else{
-                alertBuilder = new AlertDialog.Builder(this);
-                alertBuilder.setTitle("Login Failed")
-                        .setMessage("Incorrect Username/Password")
-                        .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-
-                            }
-                        }).setIcon(R.drawable.delete1).show();
+                showAlert("Login Failed", "Incorrect Username/Password");
             }
         }else{
-            alertBuilder = new AlertDialog.Builder(this);
-            alertBuilder.setTitle("Invalid Input")
-                    .setMessage("Please enter Username & Password")
-                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-
-                        }
-                    }).setIcon(R.drawable.delete1).show();
+            showAlert("Invalid Input", "Please enter Username & Password");
         }
 
+    }
+
+    private void showAlert(String title, String message){
+        alertBuilder = new AlertDialog.Builder(this);
+        alertBuilder.setTitle(title).setMessage(message)
+                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                }).setIcon(R.drawable.delete1).show();
     }
 
     ////////// Facebook Authentication
