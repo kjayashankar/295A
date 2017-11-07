@@ -20,12 +20,14 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.util.Locale;
 
+import edu.sjsu.intentrecognitionchatapplication.utils.JSONUtils;
 import edu.sjsu.intentrecognitionchatapplication.websockets.WebSocketClient;
 
 public class TalkToFriendActivity extends AppCompatActivity {
@@ -47,6 +49,7 @@ public class TalkToFriendActivity extends AppCompatActivity {
     ImageButton imageButton;
     Thread mThread;
     Button capturePicture = null;
+    WebSocketClient client = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -128,7 +131,7 @@ public class TalkToFriendActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Log.d("TAG","On click send chat");
-                //sendChat();
+                sendChat();
             }
         });
         capturePicture.setOnClickListener(new View.OnClickListener() {
@@ -178,20 +181,25 @@ public class TalkToFriendActivity extends AppCompatActivity {
 
     }
 
-   /* private void sendChat() {
+    private void sendChat() {
 
-        RetrieveChatData chatpush = new RetrieveChatData(myName, friend, "POST");
+        JSONObject serverObject = JSONUtils.exchangeForString(myName,friendName,chatText.getText().toString());
+        if (client != null) {
+            client.send(serverObject.toString());
+            chatText.setText("");
+        }
+        /*RetrieveChatData chatpush = new RetrieveChatData(myName, friend, "POST");
 
         String[] params = new String[2];
         params[0] = (chatText.getText().length() > 0 ) ? "text" : "image";
         params[1] = chatText.getText().toString()+"";
-        chatText.setText("");
+
         if(capturedImage != null)
             params[1] = ImageUtils.getStringImage(capturedImage);
         capturedImage = null;
         capturePicture.setBackgroundResource(R.drawable.click);
-        chatpush.execute(params);
-    }*/
+        chatpush.execute(params);*/
+    }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == CAMERA_REQUEST_INTENT && resultCode == Activity.RESULT_OK) {
@@ -213,7 +221,7 @@ public class TalkToFriendActivity extends AppCompatActivity {
     }
 
     private void setWebSockets() {
-        WebSocketClient client = new WebSocketClient(URI.create("http://10.0.0.98:8080/IntentChatServer/chat"), new WebSocketClient.Listener() {
+        client = new WebSocketClient(URI.create("http://10.0.0.98:8080/IntentChatServer/chat"), new WebSocketClient.Listener() {
             @Override
             public void onConnect() {
                 Log.d("TAG", "connection opened");
