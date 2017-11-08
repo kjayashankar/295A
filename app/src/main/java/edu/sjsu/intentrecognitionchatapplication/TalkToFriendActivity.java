@@ -17,21 +17,27 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.InputStream;
 import java.net.URI;
-import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
+import edu.sjsu.intentrecognitionchatapplication.adapter.ManageChatMessages;
+import edu.sjsu.intentrecognitionchatapplication.data.ChatMessage;
 import edu.sjsu.intentrecognitionchatapplication.utils.JSONUtils;
 import edu.sjsu.intentrecognitionchatapplication.websockets.WebSocketClient;
 
 public class TalkToFriendActivity extends AppCompatActivity {
 
+    private static final String TAG = "Conversation";
     private static final int CAMERA_REQUEST_INTENT = 1016;
     private static final int SELECT_PHOTO = 1017;
     private Bitmap capturedImage = null;
@@ -42,14 +48,16 @@ public class TalkToFriendActivity extends AppCompatActivity {
     private Context context= null;
     private EditText chatText = null;
     String friend = "";
-    JSONArray responseFetch = null;
-    ListView listActiveFriends = null;
-    //List<ChatMessage> chatMessages = new ArrayList<ChatMessage>();
+    ListView listChatMessagesView = null;
+    List<ChatMessage> chatMessages = new ArrayList<ChatMessage>();
     TextView friendText;
     ImageButton imageButton;
     Thread mThread;
     Button capturePicture = null;
     WebSocketClient client = null;
+    private boolean isInitialized = false;
+    ManageChatMessages adapter = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -62,6 +70,10 @@ public class TalkToFriendActivity extends AppCompatActivity {
             //getInfo(friend);
             //update the name on toolbar
         }
+        // debug override natural behavior and test
+        /*myName  = "Chat Friend2";
+        friendName = "Jayashankar Karnam";*/
+        //friendName  = "Chat Friend2";
         myName = "Jayashankar Karnam";
         //friend = "friend";
         friendText = (TextView)findViewById(R.id.Friend);
@@ -99,7 +111,7 @@ public class TalkToFriendActivity extends AppCompatActivity {
         super.onResume();
         imageButton = (ImageButton)findViewById(R.id.backButton);
         capturePicture = (Button) findViewById(R.id.clickPicture);
-        listActiveFriends = (ListView) findViewById(R.id.chat_listView);
+        listChatMessagesView = (ListView) findViewById(R.id.chat_listView);
 
         imageButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -112,17 +124,11 @@ public class TalkToFriendActivity extends AppCompatActivity {
         del.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                listActiveFriends.setAdapter(null);
+                listChatMessagesView.setAdapter(null);
                 Log.d("TAG","on delete");
-                //RetrieveChatData chatDel = new RetrieveChatData(myName, friend, "DEL");
-                //chatDel.execute();
+
             }
         });
-
-        //getInfo(friend);
-        //FetchChat fetchChat = new FetchChat(friend);
-        //mThread = new Thread(fetchChat);
-        //mThread.start();
 
         chatText = (EditText) findViewById(R.id.chatText);
         final Button sendChat = (Button) findViewById(R.id.sendChat);
@@ -177,17 +183,38 @@ public class TalkToFriendActivity extends AppCompatActivity {
                 }
             }
         });
+    }
 
+    private void setAdapter(){
+        final RelativeLayout chatClick = (RelativeLayout) findViewById(R.id.chatWindow);
+        final ImageView expandedImageView = (ImageView) findViewById(
+                R.id.expanded_image);
 
+        adapter = new ManageChatMessages(friendDP, myDP, this, R.layout.chat_message, chatMessages, chatClick, expandedImageView);
+        listChatMessagesView.setAdapter(adapter);
     }
 
     private void sendChat() {
 
-        JSONObject serverObject = JSONUtils.exchangeForString(myName,friendName,chatText.getText().toString());
+        String value = chatText.getText().toString();
+        JSONObject serverObject = JSONUtils.exchangeForString(myName,friendName,value);
         if (client != null) {
             client.send(serverObject.toString());
-            chatText.setText("");
+            ChatMessage messageObject = new ChatMessage(null,value,"ME");
+            chatMessages.add(messageObject);
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (isInitialized) {
+                        adapter.notifyDataSetChanged();
+                    } else {
+                        setAdapter();
+                    }
+                    chatText.setText("");
+                }
+            });
         }
+
         /*RetrieveChatData chatpush = new RetrieveChatData(myName, friend, "POST");
 
         String[] params = new String[2];
@@ -221,7 +248,10 @@ public class TalkToFriendActivity extends AppCompatActivity {
     }
 
     private void setWebSockets() {
-        client = new WebSocketClient(URI.create("http://10.0.0.98:8080/IntentChatServer/chat"), new WebSocketClient.Listener() {
+        String path = "http://10.0.0.98:8080/IntentChatServer/chat?from="+myName+"&to="+friendName;
+
+        Log.d(TAG,path);
+        client = new WebSocketClient(URI.create(path.replaceAll(" ","+")), new WebSocketClient.Listener() {
             @Override
             public void onConnect() {
                 Log.d("TAG", "connection opened");
@@ -232,11 +262,33 @@ public class TalkToFriendActivity extends AppCompatActivity {
              * On receiving the message from web socket server
              * */
             @Override
-            public void onMessage(String message) {
+            public void onMessage(final String message) {
                 Log.d("TAG", String.format("Got string message! %s", message));
 
-                //parseMessage(message);
+                //Toast.makeText(getApplicationContext(),message,Toast.LENGTH_LONG);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (!isInitialized) {
+                            parseMessage(message);
+                            isInitialized = true;
+                        }
+                        else{
+                            JSONObject object = getJSONObject(message);
+                            String value = "";
+                            try {
+                                value = object.getString("value");
+                                ChatMessage message = new ChatMessage(null,value,"HIM");
+                                chatMessages.add(message);
+                                adapter.notifyDataSetChanged();
+                            }
+                            catch (Exception e) {
 
+                                Log.e(TAG,"error in updating incoming message",e.fillInStackTrace());
+                            }
+                        }
+                    }
+                });
             }
 
             @Override
@@ -276,4 +328,61 @@ public class TalkToFriendActivity extends AppCompatActivity {
         client.connect();
     }
 
+    private JSONObject getJSONObject(String data) {
+        if ( data == null || data.length() == 0)
+            return null;
+        JSONObject json;
+        try {
+            json = new JSONObject(data);
+        }
+        catch(Exception e){
+            Log.e(TAG,"json object cannot be created",e.fillInStackTrace());
+            return null;
+        }
+        return json;
+    }
+
+    private void parseMessage(String serverData) {
+
+        if (serverData == null || serverData.length() == 0)
+            return;
+        JSONArray array = null;
+        //chatMessages = new ArrayList<ChatMessage>();
+        try {
+            array = new JSONArray(serverData);
+            Log.d(TAG,array+"");
+
+        }
+        catch(JSONException e){
+            Log.e(TAG,"json array not built",e.fillInStackTrace());
+        }
+            int size = array.length();
+            for (int i = 0; i < size; i++) {
+                ChatMessage item = null;
+                try {
+                    JSONObject object = array.getJSONObject(i);
+                    String data = object.getString("value");
+                    if (data != null && data.length() < 100) {
+                        if (myName.equalsIgnoreCase(object.getString("sender"))) {
+                            item = new ChatMessage(null, data, "ME");
+                        } else {
+                            item = new ChatMessage(null, data, "HIM");
+                        }
+                    } else {
+                        /*Bitmap chatImage = ImageUtils.getBitmapFromBase64(data);
+                        if (myName.equalsIgnoreCase(object.getString("sender"))) {
+                            item = new ChatMessage(chatImage, "", "ME");
+                        } else {
+                            item = new ChatMessage(chatImage, "", "HIM");
+                        }*/
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                chatMessages.add(item);
+            }
+
+            setAdapter();
+            isInitialized = true;
+    }
 }
