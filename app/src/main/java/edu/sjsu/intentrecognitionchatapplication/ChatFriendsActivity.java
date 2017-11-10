@@ -95,7 +95,7 @@ public class ChatFriendsActivity extends AppCompatActivity implements AdapterVie
                         JSONObject object;
                         try {
                             object = array.getJSONObject(size);
-                            mFriendList.add(new Friend(object.getString("name")));
+                            mFriendList.add(new Friend(object.getString("name"),object.getString("value")));
                         }
                         catch(Exception e){}
                     }

@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.List;
@@ -30,6 +31,7 @@ public class ManageChatFriendsAdapter extends ArrayAdapter<Friend> {
     /*private view holder class*/
     private class ViewHolder {
         TextView name;
+        //LinearLayout layout;
     }
 
     public View getView(int position, View convertView, ViewGroup parent) {
@@ -42,6 +44,10 @@ public class ManageChatFriendsAdapter extends ArrayAdapter<Friend> {
             convertView = mInflater.inflate(R.layout.friend_individual, null);
             holder = new ViewHolder();
             holder.name = (TextView) convertView.findViewById(R.id.friend_name);
+            //LinearLayout layout = (LinearLayout) convertView.findViewById(R.id.friend_layout);
+            if (!rowItem.isRead())
+                //holder.layout.setBackgroundColor();
+                holder.name.setBackgroundColor(context.getResources().getColor(R.color.lightgreen));
             convertView.setTag(holder);
         } else
             holder = (ViewHolder) convertView.getTag();
