@@ -50,7 +50,21 @@
             android:layout_width="1.5dp"
             android:layout_height="40dp"
             android:background="@android:color/black" />
-
+        <TextView
+            android:textSize="20dp"
+            android:textAlignment="center"
+            android:layout_height="40dp"
+            android:background="@color/fill"
+            android:layout_weight="1"
+            android:layout_gravity="center_vertical"
+            android:text="CONF.."
+            android:layout_width="wrap_content"
+            android:layout_toRightOf="@+id/friendRequests"
+            android:id="@+id/friendConfirmations" />
+        <TextView
+            android:layout_width="1.5dp"
+            android:layout_height="40dp"
+            android:background="@android:color/black" />
 
     </LinearLayout>
     <ListView
