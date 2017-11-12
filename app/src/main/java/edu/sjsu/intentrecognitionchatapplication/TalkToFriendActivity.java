@@ -66,7 +66,7 @@ public class TalkToFriendActivity extends AppCompatActivity {
 
         if(getIntent() != null){
             friend = getIntent().getStringExtra("friend");
-            friendName = getIntent().getStringExtra("fullname");
+            friendName = getIntent().getStringExtra("friendName");
             //getInfo(friend);
             //update the name on toolbar
         }
@@ -190,7 +190,7 @@ public class TalkToFriendActivity extends AppCompatActivity {
         final ImageView expandedImageView = (ImageView) findViewById(
                 R.id.expanded_image);
 
-        adapter = new ManageChatMessages(friendDP, myDP, this, R.layout.chat_message, chatMessages, chatClick, expandedImageView);
+        adapter = new ManageChatMessages(friendDP, myDP, getApplicationContext(), R.layout.chat_message, chatMessages, chatClick, expandedImageView);
         listChatMessagesView.setAdapter(adapter);
     }
 
@@ -205,7 +205,7 @@ public class TalkToFriendActivity extends AppCompatActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    if (isInitialized) {
+                    if (adapter != null) {
                         adapter.notifyDataSetChanged();
                     } else {
                         setAdapter();
@@ -382,7 +382,9 @@ public class TalkToFriendActivity extends AppCompatActivity {
                 chatMessages.add(item);
             }
 
-            setAdapter();
+            if (adapter != null) {
+                setAdapter();
+            }
             isInitialized = true;
     }
 }

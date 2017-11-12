@@ -65,7 +65,7 @@ public class ManageFriendsActivity extends AppCompatActivity {
                 friendRequests.setBackgroundColor(getResources().getColor(R.color.fill));
                 friendConfirmations.setBackgroundColor(getResources().getColor(R.color.fill));
                 populateList("friends");
-                inflateUI();
+                inflateUI("friends");
                 //new SearchFriends("friend").execute();
             }
         });
@@ -78,7 +78,7 @@ public class ManageFriendsActivity extends AppCompatActivity {
                 friendConfirmations.setBackgroundColor(getResources().getColor(R.color.fill));
 
                 populateList("requests");
-                inflateUI();
+                inflateUI("requests");
                 //new SearchFriends("requests").execute();
             }
         });
@@ -91,19 +91,19 @@ public class ManageFriendsActivity extends AppCompatActivity {
                 friendConfirmations.setBackgroundColor(getResources().getColor(R.color.fillhighlight));
 
                 populateList("confirmations");
-                inflateUI();
+                inflateUI("confirmations");
                 //new SearchFriends("requests").execute();
             }
         });
     }
 
-    private void inflateUI() {
+    private void inflateUI(String option) {
         ManageFriendsAdapter adapter = null;
         ListView listView = (ListView) findViewById(R.id.friendsView);
         if(friends != null && friends.size() > 0) {
             if (method.length() > 0) {
                 //adapter = new ManageFriendsAdapter(myName, this, R.layout.friend_individual, friends, method);
-                adapter = new ManageFriendsAdapter(this, R.layout.friend_individual, friends);
+                adapter = new ManageFriendsAdapter(this, R.layout.friend_individual, friends, myName, option);
 
 
             } else {
