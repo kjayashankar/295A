@@ -3,6 +3,7 @@ package edu.sjsu.intentrecognitionchatapplication.adapter;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,7 +12,12 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.List;
+import java.util.Map;
 
 import edu.sjsu.intentrecognitionchatapplication.R;
 import edu.sjsu.intentrecognitionchatapplication.TalkToFriendActivity;
@@ -22,6 +28,8 @@ import edu.sjsu.intentrecognitionchatapplication.data.Friend;
  */
 
 public class ManageFriendsAdapter extends ArrayAdapter<Friend> {
+
+    private static final String END_POINT_URL = "http://10.0.0.10:8080/IntentChatServer/service/friendsPage/";
 
     private static final String TAG = "ManageFriendsAdapter";
     private Context context;
@@ -44,7 +52,7 @@ public class ManageFriendsAdapter extends ArrayAdapter<Friend> {
         ImageButton level;
     }
 
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
         ViewHolder holder = null;
         Friend rowItem = getItem(position);
 
@@ -83,24 +91,74 @@ public class ManageFriendsAdapter extends ArrayAdapter<Friend> {
                 @Override
                 public void onClick(View view) {
                     Log.d(TAG,"username "+myName + " : "+"friend_username " +name);
-
-                   // new FriendOperation("accept",myMap).execute();
+                    ManageFriendsAdapter.this.remove(getItem(position));
+                    ManageFriendsAdapter.this.notifyDataSetChanged();
+                    new FriendOperation(END_POINT_URL+"accept/"+myName+"/"+name).execute();
                 }
             });
 
         }
 
+        if (!"search".equalsIgnoreCase(option)) {
+            holder.level = (ImageButton) convertView.findViewById(R.id.level);
+            holder.level.setBackgroundResource(android.R.drawable.ic_menu_delete);
 
-        holder.level = (ImageButton) convertView.findViewById(R.id.level);
-        holder.level.setBackgroundResource(android.R.drawable.ic_menu_delete);
+            holder.level.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Log.v(TAG, "cancelling friend");
+                    ManageFriendsAdapter.this.remove(getItem(position));
+                    ManageFriendsAdapter.this.notifyDataSetChanged();
+                    new FriendOperation(END_POINT_URL + "deleteRequest/" + myName + "/" + name).execute();
+                }
+            });
+        }
+        else {
+            holder.level = (ImageButton) convertView.findViewById(R.id.level);
+            holder.level.setBackgroundResource(R.drawable.plus);
 
-        holder.level.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.v(TAG,"cancelling friend");
-                //new FriendOperation("cancel",myMap).execute();
-            }
-        });
+            holder.level.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Log.v(TAG, "add friend");
+                    ManageFriendsAdapter.this.remove(getItem(position));
+                    ManageFriendsAdapter.this.notifyDataSetChanged();
+                    new FriendOperation(END_POINT_URL + "sendRequest/" + myName + "/" + name).execute();
+                }
+            });
+        }
         return convertView;
+    }
+}
+
+class FriendOperation extends AsyncTask<Void,Map,Void>{
+
+    private String TAG = "FriendOperationTAG";
+    String endPoint;
+
+
+    FriendOperation(String endPoint) {
+        this.endPoint = endPoint;
+
+    }
+    @Override
+    protected Void doInBackground(Void... voids) {
+        StringBuilder result = new StringBuilder();
+        try {
+            URL url = new URL(endPoint);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            String line;
+            while ((line = rd.readLine()) != null) {
+                result.append(line);
+            }
+            rd.close();
+            Log.v(TAG,result.toString());
+        }
+        catch(Exception e){
+            Log.e(TAG,"http response",e.fillInStackTrace());
+        }
+        return null;
     }
 }
