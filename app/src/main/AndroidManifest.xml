@@ -28,15 +28,17 @@
 
         <activity android:name=".LoginActivity" android:label="@string/title_activity_main" android:theme="@style/AppTheme.NoActionBar"/>
         <activity android:name=".ManageFriendsActivity">
-        <intent-filter>
-            <action android:name="android.intent.action.MAIN" />
-            <category android:name="android.intent.category.LAUNCHER" />
-        </intent-filter>
-        </activity>
-        <activity android:name=".ChatFriendsActivity" android:theme="@style/AppTheme.NoActionBar" >
 
         </activity>
-        <activity android:name=".TalkToFriendActivity" android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".ChatFriendsActivity" android:theme="@style/AppTheme.NoActionBar" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".TalkToFriendActivity" android:theme="@style/AppTheme.NoActionBar" >
+
+        </activity>
         <activity android:name=".UserProfileActivity" />
     </application>
 

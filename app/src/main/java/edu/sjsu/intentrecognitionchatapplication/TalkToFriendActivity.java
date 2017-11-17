@@ -78,7 +78,7 @@ public class TalkToFriendActivity extends AppCompatActivity {
         //friend = "friend";
         friendText = (TextView)findViewById(R.id.Friend);
         if(friendName == null || friendName.length() == 0)
-            friendName = "Friend Surname";
+            friendName = "Chat Friend2";
         friendText.setText(friendName);
 
         context = this;
@@ -190,7 +190,7 @@ public class TalkToFriendActivity extends AppCompatActivity {
         final ImageView expandedImageView = (ImageView) findViewById(
                 R.id.expanded_image);
 
-        adapter = new ManageChatMessages(friendDP, myDP, getApplicationContext(), R.layout.chat_message, chatMessages, chatClick, expandedImageView);
+        adapter = new ManageChatMessages(friendDP, myDP, this, R.layout.chat_message, chatMessages, chatClick, expandedImageView);
         listChatMessagesView.setAdapter(adapter);
     }
 
@@ -265,21 +265,29 @@ public class TalkToFriendActivity extends AppCompatActivity {
             public void onMessage(final String message) {
                 Log.d("TAG", String.format("Got string message! %s", message));
 
+                if(message == null || message.length() == 0)
+                    return;
                 //Toast.makeText(getApplicationContext(),message,Toast.LENGTH_LONG);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        if (!isInitialized) {
+                        if (adapter == null) {
                             parseMessage(message);
-                            isInitialized = true;
+                            final RelativeLayout chatClick = (RelativeLayout) findViewById(R.id.chatWindow);
+                            final ImageView expandedImageView = (ImageView) findViewById(
+                                    R.id.expanded_image);
+
+                            adapter = new ManageChatMessages(friendDP, myDP, getApplicationContext(), R.layout.chat_message, chatMessages, chatClick, expandedImageView);
+                            listChatMessagesView.setAdapter(adapter);
+                            //adapter.notifyDataSetChanged();
                         }
                         else{
                             JSONObject object = getJSONObject(message);
                             String value = "";
                             try {
                                 value = object.getString("value");
-                                ChatMessage message = new ChatMessage(null,value,"HIM");
-                                chatMessages.add(message);
+                                ChatMessage message1 = new ChatMessage(null,value,"HIM");
+                                chatMessages.add(message1);
                                 adapter.notifyDataSetChanged();
                             }
                             catch (Exception e) {
@@ -289,6 +297,7 @@ public class TalkToFriendActivity extends AppCompatActivity {
                         }
                     }
                 });
+
             }
 
             @Override
@@ -383,8 +392,8 @@ public class TalkToFriendActivity extends AppCompatActivity {
             }
 
             if (adapter != null) {
-                setAdapter();
+
             }
-            isInitialized = true;
+
     }
 }

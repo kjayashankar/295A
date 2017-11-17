@@ -22,7 +22,7 @@ import edu.sjsu.intentrecognitionchatapplication.data.ChatMessage;
 import edu.sjsu.intentrecognitionchatapplication.data.Friend;
 import edu.sjsu.intentrecognitionchatapplication.websockets.WebSocketClient;
 
-public class ChatFriendsActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
+public class ChatFriendsActivity extends AppCompatActivity implements AdapterView.OnItemClickListener{
 
     private List<Friend> mFriendList = null;
     private ListView listActiveFriends;
@@ -35,6 +35,7 @@ public class ChatFriendsActivity extends AppCompatActivity implements AdapterVie
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat_friends);
         listActiveFriends = (ListView) findViewById(R.id.listView);
+        listActiveFriends.setDescendantFocusability(ListView.FOCUS_BLOCK_DESCENDANTS);
     }
 
     @Override
@@ -48,16 +49,11 @@ public class ChatFriendsActivity extends AppCompatActivity implements AdapterVie
                 //startActivity(i);
             }
         });
-        listActiveFriends.setOnItemClickListener(this);
         setNotificationSocket();
     }
 
-    private void getActiveFriends(){
-
-    }
-
     private void setNotificationSocket(){
-        String path = "http://10.0.0.98:8080/IntentChatServer/notification?from="+myName;
+        String path = "http://10.0.0.98:8080/IntentChatServer/notification?from="+myName.replaceAll(" ","\\+");
 
         Log.d(TAG,path);
         client = new WebSocketClient(URI.create(path.replaceAll(" ","+")), new WebSocketClient.Listener() {
@@ -99,8 +95,10 @@ public class ChatFriendsActivity extends AppCompatActivity implements AdapterVie
                         }
                         catch(Exception e){}
                     }
-                    ManageChatFriendsAdapter adapter = new ManageChatFriendsAdapter(getApplicationContext(), R.layout.chat_list_item, mFriendList);
+                    ManageChatFriendsAdapter adapter = new ManageChatFriendsAdapter(getApplicationContext(), R.layout.chat_list_item, mFriendList,"");
                     listActiveFriends.setAdapter(adapter);
+                    //listActiveFriends.setOnItemClickListener(ChatFriendsActivity.this);
+
                 }
             });
         }
@@ -134,12 +132,9 @@ public class ChatFriendsActivity extends AppCompatActivity implements AdapterVie
         client.connect();
 }
 
-    @Override
-    public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
+   @Override
+    public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
 
-        Intent i = new Intent(this, TalkToFriendActivity.class);
-        i.putExtra("friend", "Jay Karnam");
-        i.putExtra("fullname",mFriendList.get(pos).getName());
-        startActivity(i);
+
     }
 }
