@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">IntentRecognitionChatApplication</string>
+    <string name="app_name">Smart Chat</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="login_username">Email ID</string>
     <string name="login_password">Password</string>

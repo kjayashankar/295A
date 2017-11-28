@@ -2,7 +2,6 @@ package edu.sjsu.intentrecognitionchatapplication;
 
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
@@ -12,6 +11,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -42,7 +46,7 @@ import java.util.Arrays;
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener, GoogleApiClient.OnConnectionFailedListener {
 
-    private Button localLogin;
+    private Button localLogin, localSignUp;
     private SignInButton googleLogin;
     private LoginButton fbLogin;
     private GoogleApiClient googleApiClient;
@@ -51,6 +55,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private static final int REQ_CODE = 9001;
     private AlertDialog.Builder alertBuilder;
     public static SessionManager session;
+
+    public static final String REGISTER_ENDPOINT_URL = "";
+    public static final String AUTHENTICATE_ENDPOINT_URL = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,8 +68,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         inputUserName = (EditText) findViewById(R.id.user_name);
         inputPassword = (EditText) findViewById(R.id.user_password);
         localLogin = (Button) findViewById(R.id.bn_local_login);
-        session = new SessionManager(getApplicationContext());
+        localSignUp = (Button) findViewById(R.id.bn_local_signup);
+        session = SessionManager.getSession(getApplicationContext());
         localLogin.setOnClickListener(this);
+        localSignUp.setOnClickListener(this);
+
 
         //Google Auth Setup
         googleLogin = (SignInButton) findViewById(R.id.bn_google_login);
@@ -88,6 +98,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 break;
             case R.id.bn_logout :
                 doLogout();
+                break;
+            case R.id.bn_local_signup :
+                doSignUp();
                 break;
         }
     }
@@ -215,6 +228,67 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 session.logoutUser();
             }
         });
+    }
+
+    private void registerUserInDatabase(String name, String email, String picURL) throws JSONException {
+        JSONObject params = new JSONObject();
+        params.put("name", name);
+        params.put("email", email);
+        params.put("picURL", picURL);
+        params.put("password", null);
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, REGISTER_ENDPOINT_URL, params, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    if(response.getString("status") == "200"){
+                        Intent intent = new Intent(getApplicationContext(), UserProfileActivity.class);
+                        startActivity(intent);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        });
+        com.android.volley.RequestQueue queue = Volley.newRequestQueue(LoginActivity.this);
+        queue.add(request);
+    }
+
+    private void authenticateUserFromDatabase(String userName, String password) throws JSONException {
+        JSONObject params = new JSONObject();
+        params.put("userName", userName);
+        params.put("password", password);
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, AUTHENTICATE_ENDPOINT_URL, params, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    if(response.getString("status") == "200"){
+                        Intent intent = new Intent(getApplicationContext(), UserProfileActivity.class);
+                        startActivity(intent);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        });
+        com.android.volley.RequestQueue queue = Volley.newRequestQueue(LoginActivity.this);
+        queue.add(request);
+    }
+
+    private void doSignUp(){
+        Intent intent = new Intent(getApplicationContext(), SignupActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
     }
 
 }

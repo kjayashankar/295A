@@ -11,8 +11,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id"/>
-        <activity android:name="com.facebook.FacebookActivity"
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id" />
+
+        <activity
+            android:name="com.facebook.FacebookActivity"
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
             android:label="@string/app_name" />
         <activity
@@ -25,21 +29,19 @@
                 <data android:scheme="@string/fb_login_protocol_scheme" />
             </intent-filter>
         </activity>
-
-        <activity android:name=".LoginActivity" android:label="@string/title_activity_main" android:theme="@style/AppTheme.NoActionBar"/>
-        <activity android:name=".ManageFriendsActivity">
-
-        </activity>
-        <activity android:name=".ChatFriendsActivity" android:theme="@style/AppTheme.NoActionBar" >
+        <activity
+            android:name=".ChatFriendsActivity"
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".TalkToFriendActivity" android:theme="@style/AppTheme.NoActionBar" >
-
-        </activity>
+        <activity android:name=".TalkToFriendActivity" android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".ManageFriendsActivity" />
+        <activity android:name=".LoginActivity" />
         <activity android:name=".UserProfileActivity" />
+        <activity android:name=".SignupActivity" />
     </application>
 
 </manifest>
