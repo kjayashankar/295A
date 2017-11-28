@@ -49,11 +49,13 @@ public class ChatFriendsActivity extends AppCompatActivity implements AdapterVie
                 //startActivity(i);
             }
         });
-        setNotificationSocket();
+        if(client==null) {
+            setNotificationSocket();
+        }
     }
 
     private void setNotificationSocket(){
-        String path = "http://10.0.0.98:8080/IntentChatServer/notification?from="+myName.replaceAll(" ","\\+");
+        String path = "http://10.0.0.25:8080/IntentChatServer/notification?from="+myName.replaceAll(" ","\\+");
 
         Log.d(TAG,path);
         client = new WebSocketClient(URI.create(path.replaceAll(" ","+")), new WebSocketClient.Listener() {
@@ -134,7 +136,5 @@ public class ChatFriendsActivity extends AppCompatActivity implements AdapterVie
 
    @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-
-
     }
 }

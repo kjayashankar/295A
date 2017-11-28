@@ -54,6 +54,7 @@ public class TalkToFriendActivity extends AppCompatActivity {
     ImageButton imageButton;
     Thread mThread;
     Button capturePicture = null;
+    Button classify=null;
     WebSocketClient client = null;
     private boolean isInitialized = false;
     ManageChatMessages adapter = null;
@@ -112,6 +113,7 @@ public class TalkToFriendActivity extends AppCompatActivity {
         imageButton = (ImageButton)findViewById(R.id.backButton);
         capturePicture = (Button) findViewById(R.id.clickPicture);
         listChatMessagesView = (ListView) findViewById(R.id.chat_listView);
+        classify=(Button) findViewById(R.id.classify);
 
         imageButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -129,6 +131,7 @@ public class TalkToFriendActivity extends AppCompatActivity {
 
             }
         });
+
 
         chatText = (EditText) findViewById(R.id.chatText);
         final Button sendChat = (Button) findViewById(R.id.sendChat);
@@ -248,7 +251,7 @@ public class TalkToFriendActivity extends AppCompatActivity {
     }
 
     private void setWebSockets() {
-        String path = "http://10.0.0.98:8080/IntentChatServer/chat?from="+myName+"&to="+friendName;
+        String path = "http://10.0.0.25:8080/IntentChatServer/chat?from="+myName+"&to="+friendName;
 
         Log.d(TAG,path);
         client = new WebSocketClient(URI.create(path.replaceAll(" ","+")), new WebSocketClient.Listener() {
@@ -279,6 +282,18 @@ public class TalkToFriendActivity extends AppCompatActivity {
 
                             adapter = new ManageChatMessages(friendDP, myDP, getApplicationContext(), R.layout.chat_message, chatMessages, chatClick, expandedImageView);
                             listChatMessagesView.setAdapter(adapter);
+                            //test
+                            classify.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    adapter = new ManageChatMessages(friendDP, myDP, TalkToFriendActivity.this, R.layout.chat_message, chatMessages, chatClick, expandedImageView,true);
+                                    Log.d("TAG","checking stuff");
+                                    listChatMessagesView.setAdapter(adapter);
+
+
+                                }
+                            });
+
                             //adapter.notifyDataSetChanged();
                         }
                         else{
