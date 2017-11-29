@@ -1,8 +1,12 @@
 package edu.sjsu.intentrecognitionchatapplication;
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -20,9 +24,10 @@ import java.util.Locale;
 import edu.sjsu.intentrecognitionchatapplication.adapter.ManageChatFriendsAdapter;
 import edu.sjsu.intentrecognitionchatapplication.data.ChatMessage;
 import edu.sjsu.intentrecognitionchatapplication.data.Friend;
+import edu.sjsu.intentrecognitionchatapplication.utils.Constants;
 import edu.sjsu.intentrecognitionchatapplication.websockets.WebSocketClient;
 
-public class ChatFriendsActivity extends AppCompatActivity implements AdapterView.OnItemClickListener{
+public class ChatFriendsActivity extends AppCompatActivity {
 
     private List<Friend> mFriendList = null;
     private ListView listActiveFriends;
@@ -55,7 +60,7 @@ public class ChatFriendsActivity extends AppCompatActivity implements AdapterVie
     }
 
     private void setNotificationSocket(){
-        String path = "http://10.0.0.25:8080/IntentChatServer/notification?from="+myName.replaceAll(" ","\\+");
+        String path = "http://"+ Constants.HOST_NAME+":"+Constants.PORT+"/IntentChatServer/notification?from="+myName.replaceAll(" ","\\+");
 
         Log.d(TAG,path);
         client = new WebSocketClient(URI.create(path.replaceAll(" ","+")), new WebSocketClient.Listener() {
@@ -71,38 +76,87 @@ public class ChatFriendsActivity extends AppCompatActivity implements AdapterVie
         public void onMessage(final String message) {
             Log.d("TAG", String.format("Got string message! %s", message));
 
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mFriendList = new ArrayList<Friend>();
+            if (message.startsWith("1")) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mFriendList = new ArrayList<Friend>();
 
-                    JSONArray array = null;
-                    try {
-                        array = new JSONArray(message);
-                    }
-                    catch(Exception e){
-
-                    }
-                    if (array == null){
-                        listActiveFriends.setAdapter(null);
-                        return;
-                    }
-                    int size = array.length();
-
-                    while (size-- > 0){
-                        JSONObject object;
+                        JSONArray array = null;
                         try {
-                            object = array.getJSONObject(size);
-                            mFriendList.add(new Friend(object.getString("name"),object.getString("value")));
-                        }
-                        catch(Exception e){}
-                    }
-                    ManageChatFriendsAdapter adapter = new ManageChatFriendsAdapter(getApplicationContext(), R.layout.chat_list_item, mFriendList,"");
-                    listActiveFriends.setAdapter(adapter);
-                    //listActiveFriends.setOnItemClickListener(ChatFriendsActivity.this);
 
-                }
-            });
+                            array = new JSONArray(message.substring(1));
+                        } catch (Exception e) {
+
+                        }
+                        if (array == null) {
+                            listActiveFriends.setAdapter(null);
+                            return;
+                        }
+                        int size = array.length();
+
+                        while (size-- > 0) {
+                            JSONObject object;
+                            try {
+                                object = array.getJSONObject(size);
+                                mFriendList.add(new Friend(object.getString("name"), object.getString("value")));
+                            } catch (Exception e) {
+                            }
+                        }
+                        ManageChatFriendsAdapter adapter = new ManageChatFriendsAdapter(getApplicationContext(), R.layout.chat_list_item, mFriendList, "");
+                        listActiveFriends.setAdapter(adapter);
+                        //listActiveFriends.setOnItemClickListener(ChatFriendsActivity.this);
+
+                    }
+                });
+            }
+            if (message.startsWith("2")) {
+                // notification
+                String message2 = message.substring(1);
+                NotificationCompat.Builder mBuilder =
+                        new NotificationCompat.Builder(getApplicationContext());
+               /* Intent i = new Intent(getApplicationContext(), TalkToFriendActivity.class);
+                i.putExtra("friend", message2.split(";")[1]);
+                i.putExtra("friendName",message2.split(";")[1]);
+                getApplicationContext().startActivity(i);
+
+                PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, , 0);
+
+                mBuilder.setContentIntent(pendingIntent = null);
+
+                mBuilder.setSmallIcon(R.drawable.classify);
+                mBuilder.setContentTitle("Message notification");
+                mBuilder.setContentText(message2.split(";")[0]);
+
+                NotificationManager mNotificationManager =
+
+                        (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+                mNotificationManager.notify(001, mBuilder.build());
+                */
+            }
+            if(message.startsWith("3")) {
+                String message2 = message.substring(1);
+                String friend = message2.split(";")[1];
+                NotificationCompat.Builder mBuilder =
+                        new NotificationCompat.Builder(getApplicationContext());
+                Intent i = new Intent(getApplicationContext(), TalkToFriendActivity.class);
+                i.putExtra("friend", friend);
+                i.putExtra("friendName",friend);
+                getApplicationContext().startActivity(i);
+
+                PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, i, 0);
+
+                mBuilder.setContentIntent(pendingIntent);
+
+                mBuilder.setSmallIcon(R.drawable.classify);
+                mBuilder.setContentTitle("Message notification");
+                mBuilder.setContentText("You have a message from "+friend);
+
+                NotificationManager mNotificationManager =
+                        (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                mNotificationManager.notify(001, mBuilder.build());
+            }
         }
 
         @Override
@@ -130,11 +184,6 @@ public class ChatFriendsActivity extends AppCompatActivity implements AdapterVie
         }
 
     }, null);
-
         client.connect();
-}
-
-   @Override
-    public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
     }
 }

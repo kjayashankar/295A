@@ -32,6 +32,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +40,7 @@ import java.util.List;
 import edu.sjsu.intentrecognitionchatapplication.R;
 import edu.sjsu.intentrecognitionchatapplication.data.ChatMessage;
 import edu.sjsu.intentrecognitionchatapplication.data.Friend;
+import edu.sjsu.intentrecognitionchatapplication.utils.Constants;
 import edu.sjsu.intentrecognitionchatapplication.websockets.ClassificationFragment;
 import edu.sjsu.intentrecognitionchatapplication.websockets.ClassifyDialogFragment;
 
@@ -61,7 +63,7 @@ public class ManageChatMessages extends ArrayAdapter<ChatMessage> implements Cla
     private volatile List<ChatMessage> items;
     boolean flag=false;
     private String selectedMessage=null;
-    private static String END_POINT_URL="http://10.0.0.25:8080/IntentChatServer/service/friendsPage/";
+    private static String END_POINT_URL="http://"+ Constants.HOST_NAME+":"+Constants.PORT+"/IntentChatServer/service/friendsPage/";
 
     public ManageChatMessages(Bitmap friendDP,Bitmap myDP, Context context, int resourceId,
                                     List<ChatMessage> items,View chatClick,ImageView expandedImageView) {
@@ -253,7 +255,7 @@ public class ManageChatMessages extends ArrayAdapter<ChatMessage> implements Cla
                         //Your code goes here
                         StringBuilder value = new StringBuilder();
                         try {
-                            URL url = new URL(END_POINT_URL + "updateCorpus/eat/" + selectedMessage);
+                            URL url = new URL(END_POINT_URL + "updateCorpus/eat/" + URLEncoder.encode(selectedMessage, "utf-8"));
                             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                             conn.setRequestMethod("GET");
                             BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
@@ -286,7 +288,7 @@ public class ManageChatMessages extends ArrayAdapter<ChatMessage> implements Cla
                 public void run() {
                     StringBuilder value = new StringBuilder();
                     try {
-                        URL url = new URL(END_POINT_URL + "updateCorpus/noteat/" + selectedMessage);
+                        URL url = new URL(END_POINT_URL + "updateCorpus/noteat/" + URLEncoder.encode(selectedMessage, "utf-8"));
                         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                         conn.setRequestMethod("GET");
                         BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));

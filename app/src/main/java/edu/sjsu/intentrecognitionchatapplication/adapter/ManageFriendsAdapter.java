@@ -22,6 +22,7 @@ import java.util.Map;
 import edu.sjsu.intentrecognitionchatapplication.R;
 import edu.sjsu.intentrecognitionchatapplication.TalkToFriendActivity;
 import edu.sjsu.intentrecognitionchatapplication.data.Friend;
+import edu.sjsu.intentrecognitionchatapplication.utils.Constants;
 
 /**
  * Created by jay on 9/11/17.
@@ -29,7 +30,7 @@ import edu.sjsu.intentrecognitionchatapplication.data.Friend;
 
 public class ManageFriendsAdapter extends ArrayAdapter<Friend> {
 
-    private static final String END_POINT_URL = "http://10.0.0.10:8080/IntentChatServer/service/friendsPage/";
+    private static final String END_POINT_URL = "http://"+ Constants.HOST_NAME+":"+Constants.PORT+"/IntentChatServer/service/friendsPage/";
 
     private static final String TAG = "ManageFriendsAdapter";
     private Context context;

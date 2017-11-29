@@ -32,6 +32,7 @@ import java.util.Locale;
 
 import edu.sjsu.intentrecognitionchatapplication.adapter.ManageChatMessages;
 import edu.sjsu.intentrecognitionchatapplication.data.ChatMessage;
+import edu.sjsu.intentrecognitionchatapplication.utils.Constants;
 import edu.sjsu.intentrecognitionchatapplication.utils.JSONUtils;
 import edu.sjsu.intentrecognitionchatapplication.websockets.WebSocketClient;
 
@@ -97,14 +98,7 @@ public class TalkToFriendActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        try {
-            if (mThread != null) {
-                mThread.stop();
-            }
-        }
-        catch(Exception e){
-            Log.d("ERR","Failed to stop thread");
-        }
+        client.disconnect();
     }
 
     @Override
@@ -251,7 +245,7 @@ public class TalkToFriendActivity extends AppCompatActivity {
     }
 
     private void setWebSockets() {
-        String path = "http://10.0.0.25:8080/IntentChatServer/chat?from="+myName+"&to="+friendName;
+        String path = "http://"+ Constants.HOST_NAME+":"+Constants.PORT+"/IntentChatServer/chat?from="+myName+"&to="+friendName;
 
         Log.d(TAG,path);
         client = new WebSocketClient(URI.create(path.replaceAll(" ","+")), new WebSocketClient.Listener() {
