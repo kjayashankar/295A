@@ -3,6 +3,7 @@ package edu.sjsu.intentrecognitionchatapplication;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.support.v7.app.AppCompatActivity;
 
 import java.util.HashMap;
 
@@ -10,12 +11,13 @@ import java.util.HashMap;
  * Created by satya on 10/16/17.
  */
 
-public class SessionManager {
+public class SessionManager extends AppCompatActivity {
 
     private SharedPreferences prefs;
     private SharedPreferences.Editor editor;
     private Context context;
     private int PRIVATE_MODE = 0;
+    private static SessionManager sessionManager = null;
 
 
     private static final String PREF_NAME = "ChatBotPref";
@@ -25,10 +27,16 @@ public class SessionManager {
     public static final String PHOTO_URL = "photoURL";
     public static final String LOCAL_LOGIN = "IsLocallyLoggedIn";
 
-    public SessionManager(Context context){
+    private SessionManager(Context context){
         this.context = context;
         prefs = context.getSharedPreferences(PREF_NAME, PRIVATE_MODE);
         editor = prefs.edit();
+    }
+
+    public static synchronized SessionManager getSession(Context context){
+        if(sessionManager == null)
+            sessionManager = new SessionManager(context);
+        return sessionManager;
     }
 
     // Creating login Session
@@ -54,19 +62,26 @@ public class SessionManager {
     public void logoutUser(){
         editor.clear();
         editor.commit();
+        startLoginActivity();
+    }
+
+    // Check Login Status
+    public void checkLogin(){
+        if(!prefs.getBoolean(IS_LOGIN, false))
+            startLoginActivity();
+    }
+
+    // Helper method to start Login Activity Intent
+    private void startLoginActivity(){
         Intent i = new Intent(context, LoginActivity.class);
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(i);
     }
 
-
-    // Get Login Status
-    public boolean isLoggedIn(){
-        return prefs.getBoolean(IS_LOGIN, false);
-    }
-
     // Get Login Action
-    public boolean isLocalLogin(){return prefs.getBoolean(LOCAL_LOGIN, false);}
+    public boolean isLocalLogin(){
+        return prefs.getBoolean(LOCAL_LOGIN, false);
+    }
 
 }
