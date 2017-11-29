@@ -1,5 +1,6 @@
 package edu.sjsu.intentrecognitionchatapplication;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,9 +13,11 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.android.volley.Request;
+import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
@@ -39,6 +42,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by satya on 10/14/17.
@@ -53,11 +58,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private CallbackManager callbackManager;
     private EditText inputUserName, inputPassword;
     private static final int REQ_CODE = 9001;
-    private AlertDialog.Builder alertBuilder;
+    public static AlertDialog.Builder alertBuilder;
     public static SessionManager session;
 
-    public static final String REGISTER_ENDPOINT_URL = "";
-    public static final String AUTHENTICATE_ENDPOINT_URL = "";
+    public static final String REGISTER_ENDPOINT_URL = "https://00a6de62.ngrok.io/IntentChatServer/service/friendsPage/registerUser";
+    public static final String AUTHENTICATE_ENDPOINT_URL = "https://00a6de62.ngrok.io/IntentChatServer/service/friendsPage/authenticateUser";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,35 +121,61 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
-    ////////// Local Authentication
-    private void doLocalLogin(){
-        String userName = inputUserName.getText().toString();
-        String password = inputPassword.getText().toString();
-
-        if(userName.trim().length()>0 && password.trim().length()>0){
-            if(userName.equals("satya") && password.equals("satya")){
-                session.createLoginSession(userName, "satya@gmail.com", null, true);
-                Intent intent = new Intent(getApplicationContext(), UserProfileActivity.class);
-                startActivity(intent);
-                Toast.makeText(getApplicationContext(), "Logging In..", Toast.LENGTH_SHORT).show();
-            }else{
-                showAlert("Login Failed", "Incorrect Username/Password");
-            }
-        }else{
-            showAlert("Invalid Input", "Please enter Username & Password");
-        }
-
+    private void doSignUp(){
+        Intent intent = new Intent(getApplicationContext(), SignupActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
     }
 
-    private void showAlert(String title, String message){
-        alertBuilder = new AlertDialog.Builder(this);
-        alertBuilder.setTitle(title).setMessage(message)
-                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
+    ////////// Local Authentication
+    private void doLocalLogin(){
+        String userName = inputUserName.getText().toString().trim();
+        String password = inputPassword.getText().toString().trim();
 
+        if(userName.length()<1 || password.length()<1){
+            showAlert("Invalid Input", "Please enter Username & Password", this);
+            return;
+        }
+        authenticateUserFromDatabase(userName, password);
+    }
+
+    private void authenticateUserFromDatabase(final String userName, final String password) {
+        StringRequest request = new StringRequest(Request.Method.POST, AUTHENTICATE_ENDPOINT_URL,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        if("***fail".equals(response))
+                            showAlert("Login Failed", "Incorrect Username/Password", LoginActivity.this);
+                        else{
+                            session.createLoginSession(response, userName, null, true);
+                            Intent intent = new Intent(getApplicationContext(), UserProfileActivity.class);
+                            startActivity(intent);
+                            Toast.makeText(getApplicationContext(), "Logging In..", Toast.LENGTH_SHORT).show();
+                        }
                     }
-                }).setIcon(R.drawable.delete1).show();
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                showAlert("Login Failed", "Please try again", LoginActivity.this);
+            }
+        }){
+            @Override
+            public String getBodyContentType() {
+                return "application/x-www-form-urlencoded; charset=UTF-8";
+            }
+
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("userName", userName);
+                params.put("password", password);
+                return params;
+            }
+        };
+
+        RequestQueue queue = Volley.newRequestQueue(LoginActivity.this);
+        queue.add(request);
     }
 
     ////////// Facebook Authentication
@@ -171,10 +202,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     String name = jsonObject.getString("name");
                     String email =  jsonObject.getString("email");
                     String picURL = jsonObject.getJSONObject("picture").getJSONObject("data").getString("url");
-                    session.createLoginSession(name, email, picURL, false);
-                    Intent intent = new Intent(getApplicationContext(), UserProfileActivity.class);
-                    startActivity(intent);
-                    Toast.makeText(getApplicationContext(), "Logging In..", Toast.LENGTH_SHORT).show();
+                    registerUserInDatabase(name, email, picURL, "Facebook");
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -209,17 +237,12 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             String email = account.getEmail();
             String picURL = null;
             if(account.getPhotoUrl() != null)
-                picURL = picURL = account.getPhotoUrl().toString();
-            session.createLoginSession(name, email, picURL, false);
-            Intent intent = new Intent(getApplicationContext(), UserProfileActivity.class);
-            startActivity(intent);
-            Toast.makeText(getApplicationContext(), "Logging In..", Toast.LENGTH_SHORT).show();
+                picURL = account.getPhotoUrl().toString();
+            registerUserInDatabase(name, email, picURL, "Google");
         }
     }
 
-    public void onConnectionFailed(@NonNull ConnectionResult result){
-        String abc;
-    }
+    public void onConnectionFailed(@NonNull ConnectionResult result){}
 
     public void doGoogleLogout(){
         Auth.GoogleSignInApi.signOut(googleApiClient).setResultCallback(new ResultCallback<Status>() {
@@ -230,65 +253,52 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         });
     }
 
-    private void registerUserInDatabase(String name, String email, String picURL) throws JSONException {
-        JSONObject params = new JSONObject();
-        params.put("name", name);
-        params.put("email", email);
-        params.put("picURL", picURL);
-        params.put("password", null);
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, REGISTER_ENDPOINT_URL, params, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                try {
-                    if(response.getString("status") == "200"){
-                        Intent intent = new Intent(getApplicationContext(), UserProfileActivity.class);
-                        startActivity(intent);
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
+    ////////// Helper methods to show Alert and register user in database
+    public static void showAlert(String title, String message, Context context){
+        alertBuilder = new AlertDialog.Builder(context);
+        alertBuilder.setTitle(title).setMessage(message)
+                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
 
-            }
-        });
-        com.android.volley.RequestQueue queue = Volley.newRequestQueue(LoginActivity.this);
-        queue.add(request);
+                    }
+                }).setIcon(R.drawable.delete1).show();
     }
 
-    private void authenticateUserFromDatabase(String userName, String password) throws JSONException {
-        JSONObject params = new JSONObject();
-        params.put("userName", userName);
-        params.put("password", password);
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, AUTHENTICATE_ENDPOINT_URL, params, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                try {
-                    if(response.getString("status") == "200"){
+    private void registerUserInDatabase(final String name, final String email, final String picURL, final String authType) {
+        StringRequest request = new StringRequest(Request.Method.POST, REGISTER_ENDPOINT_URL,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        session.createLoginSession(name, email, picURL, false);
                         Intent intent = new Intent(getApplicationContext(), UserProfileActivity.class);
                         startActivity(intent);
+                        Toast.makeText(getApplicationContext(), "Logging In..", Toast.LENGTH_SHORT).show();
                     }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }, new Response.ErrorListener() {
+                }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-
+                showAlert("Registration Failed", "Please try again", LoginActivity.this);
             }
-        });
-        com.android.volley.RequestQueue queue = Volley.newRequestQueue(LoginActivity.this);
-        queue.add(request);
-    }
+        }){
+            @Override
+            public String getBodyContentType() {
+                return "application/x-www-form-urlencoded; charset=UTF-8";
+            }
 
-    private void doSignUp(){
-        Intent intent = new Intent(getApplicationContext(), SignupActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("name", name);
+                params.put("email", email);
+                if(picURL != null)
+                    params.put("picURL", picURL);
+                params.put("authType", authType);
+                return params;
+            }
+        };
+        RequestQueue queue = Volley.newRequestQueue(LoginActivity.this);
+        queue.add(request);
     }
 
 }
