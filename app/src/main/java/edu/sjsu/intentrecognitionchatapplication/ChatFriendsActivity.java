@@ -118,22 +118,22 @@ public class ChatFriendsActivity extends AppCompatActivity {
                /* Intent i = new Intent(getApplicationContext(), TalkToFriendActivity.class);
                 i.putExtra("friend", message2.split(";")[1]);
                 i.putExtra("friendName",message2.split(";")[1]);
-                getApplicationContext().startActivity(i);
+                getApplicationContext().startActivity(i);*/
 
-                PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, , 0);
+                PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, null , 0);
 
-                mBuilder.setContentIntent(pendingIntent = null);
+                mBuilder.setContentIntent(pendingIntent);
 
                 mBuilder.setSmallIcon(R.drawable.classify);
                 mBuilder.setContentTitle("Message notification");
-                mBuilder.setContentText(message2.split(";")[0]);
+                mBuilder.setContentText("Touch to get nearby options for "+message2.split(";")[0]);
 
                 NotificationManager mNotificationManager =
 
                         (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
                 mNotificationManager.notify(001, mBuilder.build());
-                */
+
             }
             if(message.startsWith("3")) {
                 String message2 = message.substring(1);
