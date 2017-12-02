@@ -46,4 +46,18 @@ public class JSONUtils {
     }
 
 
+    public static JSONObject exchangeImageForString(String currentUser, String friend, String uuid) {
+
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("sender", currentUser);
+            jsonObject.put("to", friend);
+            jsonObject.put("MIME", PIC);
+            jsonObject.put("value", uuid);
+            jsonObject.put("date", System.currentTimeMillis()+"");
+        } catch (JSONException e) {
+            Log.e(TAG, "json exception", e.fillInStackTrace());
+        }
+        return jsonObject;
+    }
 }

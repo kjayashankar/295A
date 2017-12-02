@@ -32,6 +32,8 @@ public class ChatFriendsActivity extends AppCompatActivity {
     private List<Friend> mFriendList = null;
     private ListView listActiveFriends;
     private String myName = "Jayashankar Karnam";
+    //private String myName = "Chat Friend2";
+
     private WebSocketClient client = null;
     private static final String TAG = "ChatFriendsActivity";
 
@@ -56,6 +58,14 @@ public class ChatFriendsActivity extends AppCompatActivity {
         });
         if(client==null) {
             setNotificationSocket();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (client != null) {
+            client.disconnect();
         }
     }
 
@@ -120,9 +130,9 @@ public class ChatFriendsActivity extends AppCompatActivity {
                 i.putExtra("friendName",message2.split(";")[1]);
                 getApplicationContext().startActivity(i);*/
 
-                PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, null , 0);
+                //PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, null , 0);
 
-                mBuilder.setContentIntent(pendingIntent);
+                //mBuilder.setContentIntent(pendingIntent);
 
                 mBuilder.setSmallIcon(R.drawable.classify);
                 mBuilder.setContentTitle("Message notification");
@@ -177,8 +187,8 @@ public class ChatFriendsActivity extends AppCompatActivity {
 
         @Override
         public void onError(Exception error) {
-            Log.e("TAG", "Error! : " + error.getMessage());
-            Log.e("TAG","err",error.fillInStackTrace());
+            Log.e(TAG, "Error! : " + error.getMessage());
+            Log.e(TAG,"err",error.fillInStackTrace());
 
             // showToast("Error! : " + error);
         }

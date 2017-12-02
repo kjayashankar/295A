@@ -8,10 +8,10 @@ import android.graphics.Bitmap;
 
 public class ChatMessage {
         private String chatText;
-        private Bitmap chatImage;
+        private boolean chatImage;
         private String user;
 
-        public ChatMessage(Bitmap chatImage,String chatText,String user){
+        public ChatMessage(boolean chatImage,String chatText,String user){
             this.chatImage = chatImage;
             this.chatText = chatText;
             this.user = user;
@@ -25,14 +25,6 @@ public class ChatMessage {
             this.chatText = chatText;
         }
 
-        public Bitmap getChatImage() {
-            return chatImage;
-        }
-
-        public void setChatImage(Bitmap chatImage) {
-            this.chatImage = chatImage;
-        }
-
         public String getUser() {
             return user;
         }
@@ -41,4 +33,11 @@ public class ChatMessage {
             this.user = user;
         }
 
+        public boolean isChatImage() {
+            return chatImage;
+        }
+
+        public void setChatImage(boolean chatImage) {
+            this.chatImage = chatImage;
+        }
 }

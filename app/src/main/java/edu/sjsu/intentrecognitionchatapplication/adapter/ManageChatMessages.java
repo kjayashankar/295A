@@ -10,6 +10,8 @@ import android.content.SyncStatusObserver;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
@@ -41,6 +43,7 @@ import edu.sjsu.intentrecognitionchatapplication.R;
 import edu.sjsu.intentrecognitionchatapplication.data.ChatMessage;
 import edu.sjsu.intentrecognitionchatapplication.data.Friend;
 import edu.sjsu.intentrecognitionchatapplication.utils.Constants;
+import edu.sjsu.intentrecognitionchatapplication.utils.ImageUtils;
 import edu.sjsu.intentrecognitionchatapplication.websockets.ClassificationFragment;
 import edu.sjsu.intentrecognitionchatapplication.websockets.ClassifyDialogFragment;
 
@@ -99,83 +102,10 @@ public class ManageChatMessages extends ArrayAdapter<ChatMessage> implements Cla
 
     }
 
-
-
     public View getView(final int position, View convertView, ViewGroup parent) {
-       if(flag){
+
            ViewHolder holder = null;
-           //FragmentActivity activity = (FragmentActivity)(context);
-          final FragmentManager fm = ((AppCompatActivity) context).getSupportFragmentManager();
            final ChatMessage rowItem = getItem(position);
-           //z);
-           LayoutInflater mInflater = (LayoutInflater) context
-                   .getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
-           if (convertView == null) {
-               convertView = mInflater.inflate(R.layout.chat_message, null);
-              holder = new ViewHolder();
-               holder.chatText = (TextView) convertView.findViewById(R.id.chat_text);
-               holder.displayPicture = (ImageView) convertView.findViewById(R.id.icon);
-               holder.chatTextLeft = (TextView) convertView.findViewById(R.id.chat_text_left);
-               holder.chatPictureLeft = (ImageView) convertView.findViewById(R.id.chat_image_left);
-               holder.chatPicture = (ImageView) convertView.findViewById(R.id.chat_image);
-               holder.selectMessage=(Button)  convertView.findViewById(R.id.select);
-               holder.selectMessage.setVisibility(View.VISIBLE);
-               convertView.setTag(holder);
-           } else
-               holder = (ViewHolder) convertView.getTag();
-           if (rowItem != null) {
-               final Bitmap chatPicturersid = rowItem.getChatImage();
-
-               if (rowItem.getUser().equalsIgnoreCase("ME")) {
-                   RelativeLayout.LayoutParams paramsImage = (RelativeLayout.LayoutParams) holder.displayPicture.getLayoutParams();
-                   paramsImage.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
-                   holder.displayPicture.setLayoutParams(paramsImage);
-                   holder.displayPicture.setImageBitmap(myDP);
-                   holder.chatPictureLeft.setImageBitmap(rowItem.getChatImage());
-                   holder.chatTextLeft.setText(rowItem.getChatText());
-                   holder.chatPictureLeft.setOnClickListener(new View.OnClickListener() {
-                       @Override
-                       public void onClick(View v) {
-                           zoomImageFromThumb(v, chatPicturersid, expandedImageView, chatClick);
-                       }
-                   });
-
-                   holder.selectMessage.setOnClickListener(new View.OnClickListener() {
-                       public void onClick(View view) {
-                           ClassifyDialogFragment alertedFragment = new ClassifyDialogFragment();
-                           // Show Alert DialogFragment
-                           alertedFragment.setListener(ManageChatMessages.this);
-                           alertedFragment.show(fm, "Alert Dialog Fragment");
-                           // Show Alert DialogFragment
-
-
-                          // selectedMessage=((TextView) view).getText().toString();
-                           setSelectedMessage(rowItem.getChatText());
-                           Toast.makeText(getApplicationContext(), ((TextView) view).getText(),
-                                   Toast.LENGTH_SHORT).show();
-
-                       }
-                   });
-               } else {
-                   holder.chatPicture.setImageBitmap(rowItem.getChatImage());
-                   holder.chatText.setText(rowItem.getChatText());
-                   //selectedMessage=rowItem.getChatText();
-                   holder.displayPicture.setImageBitmap(friendDP);
-                   holder.chatPicture.setOnClickListener(new View.OnClickListener() {
-                       @Override
-                       public void onClick(View v) {
-                           zoomImageFromThumb(v, chatPicturersid, expandedImageView, chatClick);
-                       }
-                   });
-               }
-           }
-           return convertView;
-
-
-       } else {
-           ViewHolder holder = null;
-           ChatMessage rowItem = getItem(position);
-           //Log.d("TAG", String.format("row Item is! %s", rowItem.getChatText()));
            LayoutInflater mInflater = (LayoutInflater) context
                    .getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
            if (convertView == null) {
@@ -192,35 +122,63 @@ public class ManageChatMessages extends ArrayAdapter<ChatMessage> implements Cla
            } else
                holder = (ViewHolder) convertView.getTag();
            if (rowItem != null) {
-               final Bitmap chatPicturersid = rowItem.getChatImage();
-
                if (rowItem.getUser().equalsIgnoreCase("ME")) {
                    RelativeLayout.LayoutParams paramsImage = (RelativeLayout.LayoutParams) holder.displayPicture.getLayoutParams();
                    paramsImage.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
                    holder.displayPicture.setLayoutParams(paramsImage);
                    holder.displayPicture.setImageBitmap(myDP);
-                   holder.chatPictureLeft.setImageBitmap(rowItem.getChatImage());
-                   holder.chatTextLeft.setText(rowItem.getChatText());
-                   holder.chatPictureLeft.setOnClickListener(new View.OnClickListener() {
-                       @Override
-                       public void onClick(View v) {
-                           zoomImageFromThumb(v, chatPicturersid, expandedImageView, chatClick);
+                   if (rowItem.isChatImage()) {
+                       final Bitmap image = ImageUtils.getImage(context,rowItem.getChatText());
+                       if(image != null) {
+                           holder.chatPictureLeft.setImageBitmap(image);
+                           holder.chatPictureLeft.setOnClickListener(new View.OnClickListener() {
+                               @Override
+                               public void onClick(View v) {
+                                   zoomImageFromThumb(v, image, expandedImageView, chatClick);
+                               }
+                           });
                        }
-                   });
+                       else {
+                           holder.chatPictureLeft.setImageResource(R.drawable.download);
+                           holder.chatPictureLeft.setOnClickListener(new View.OnClickListener() {
+                               @Override
+                               public void onClick(View v) {
+                                   new DownloadImageTask().execute(rowItem.getChatText());                               }
+                           });
+                       }
+                   }
+                   else{
+                       holder.chatTextLeft.setText(rowItem.getChatText());
+                   }
                } else {
-                   holder.chatPicture.setImageBitmap(rowItem.getChatImage());
-                   holder.chatText.setText(rowItem.getChatText());
-                   holder.displayPicture.setImageBitmap(friendDP);
-                   holder.chatPicture.setOnClickListener(new View.OnClickListener() {
-                       @Override
-                       public void onClick(View v) {
-                           zoomImageFromThumb(v, chatPicturersid, expandedImageView, chatClick);
+                   if (rowItem.isChatImage()) {
+                       final Bitmap image = ImageUtils.getImage(context,rowItem.getChatText());
+                       if(image != null) {
+                           holder.chatPicture.setImageBitmap(image);
+                           holder.chatPicture.setOnClickListener(new View.OnClickListener() {
+                               @Override
+                               public void onClick(View v) {
+                                   zoomImageFromThumb(v, image, expandedImageView, chatClick);
+                               }
+                           });
                        }
-                   });
+                       else {
+                           holder.chatPicture.setImageBitmap(image);
+                           holder.chatPicture.setOnClickListener(new View.OnClickListener() {
+                               @Override
+                               public void onClick(View v) {
+                                   new DownloadImageTask().execute(rowItem.getChatText());
+                               }
+                           });
+                       }
+                   }
+                   else {
+                       holder.chatText.setText(rowItem.getChatText());
+                   }
                }
            }
            return convertView;
-       }
+
     }
     @Override
     public void onOkay(boolean result) {
@@ -451,5 +409,36 @@ public class ManageChatMessages extends ArrayAdapter<ChatMessage> implements Cla
                 mCurrentAnimator = set;
             }
         });
+    }
+}
+
+class DownloadImageTask extends AsyncTask<String, Integer, Drawable>{
+
+    private static String END_POINT_URL="http://"+ Constants.HOST_NAME+":"+Constants.PORT+"/IntentChatServer/service/friendsPage/";
+
+    @Override
+    protected Drawable doInBackground(String... strings) {
+
+        StringBuilder result = new StringBuilder();
+        try {
+            URL url = new URL(END_POINT_URL + "getImage/" + strings[0]);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            String line;
+            while ((line = rd.readLine()) != null) {
+                result.append(line);
+            }
+            rd.close();
+            Log.d("ImageDownloader",result.toString());
+            JSONObject obj = new JSONObject(result.toString());
+            ImageUtils.SaveBitmapFromString(getApplicationContext(),strings[0], obj.getString("image"));
+
+        }
+        catch(Exception e){
+            Log.e("ImageDownloader",e.getMessage(),e);
+        }
+
+        return null;
     }
 }

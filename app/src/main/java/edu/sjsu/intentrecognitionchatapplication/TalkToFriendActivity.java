@@ -3,9 +3,13 @@ package edu.sjsu.intentrecognitionchatapplication;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -19,20 +23,34 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+import android.Manifest;
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
 
 import edu.sjsu.intentrecognitionchatapplication.adapter.ManageChatMessages;
 import edu.sjsu.intentrecognitionchatapplication.data.ChatMessage;
 import edu.sjsu.intentrecognitionchatapplication.utils.Constants;
+import edu.sjsu.intentrecognitionchatapplication.utils.ImageUtils;
 import edu.sjsu.intentrecognitionchatapplication.utils.JSONUtils;
 import edu.sjsu.intentrecognitionchatapplication.websockets.WebSocketClient;
 
@@ -40,6 +58,7 @@ public class TalkToFriendActivity extends AppCompatActivity {
 
     private static final String TAG = "Conversation";
     private static final int CAMERA_REQUEST_INTENT = 1016;
+    private static final int READ_WRITE_DISK = 1018;
     private static final int SELECT_PHOTO = 1017;
     private Bitmap capturedImage = null;
     Bitmap friendDP = null;
@@ -59,6 +78,8 @@ public class TalkToFriendActivity extends AppCompatActivity {
     WebSocketClient client = null;
     private boolean isInitialized = false;
     ManageChatMessages adapter = null;
+    private static String END_POINT_URL="http://"+ Constants.HOST_NAME+":"+Constants.PORT+"/IntentChatServer/service/friendsPage/";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,32 +94,71 @@ public class TalkToFriendActivity extends AppCompatActivity {
             //update the name on toolbar
         }
         // debug override natural behavior and test
-        /*myName  = "Chat Friend2";
-        friendName = "Jayashankar Karnam";*/
-        //friendName  = "Chat Friend2";
         myName = "Jayashankar Karnam";
-        //friend = "friend";
+
+      /*  myName  = "Chat Friend2";
+        friendName = "Jayashankar Karnam";
+        //friendName  = "Chat Friend2";
+        friend = "Jayashankar Karnam";*/
         friendText = (TextView)findViewById(R.id.Friend);
         if(friendName == null || friendName.length() == 0)
             friendName = "Chat Friend2";
         friendText.setText(friendName);
 
         context = this;
-        setWebSockets();
 
+        setWebSockets();
         onStart();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+        isStoragePermissionGranted();
         onResume();
+    }
+
+    public  boolean isStoragePermissionGranted() {
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    == PackageManager.PERMISSION_GRANTED) {
+                Log.v(TAG,"Permission is granted");
+                return true;
+            } else {
+
+                Log.v(TAG,"Permission is revoked");
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                return false;
+            }
+        }
+        else { //permission is automatically granted on sdk<23 upon installation
+            Log.v(TAG,"Permission is granted");
+            return true;
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        client.disconnect();
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (client != null ) {
+            client.disconnect();
+            client = null;
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (client != null ) {
+            client.disconnect();
+            client = null;
+        }
     }
 
     @Override
@@ -165,7 +225,7 @@ public class TalkToFriendActivity extends AppCompatActivity {
                         @Override
                         public void onClick(View v) {
                             Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
-                            photoPickerIntent.setType("image/*");
+                            photoPickerIntent.setType("image*//*");
                             startActivityForResult(photoPickerIntent, SELECT_PHOTO);
                         }
                     });
@@ -180,6 +240,8 @@ public class TalkToFriendActivity extends AppCompatActivity {
                 }
             }
         });
+        //setWebSockets();
+
     }
 
     private void setAdapter(){
@@ -192,25 +254,41 @@ public class TalkToFriendActivity extends AppCompatActivity {
     }
 
     private void sendChat() {
-
-        String value = chatText.getText().toString();
-        JSONObject serverObject = JSONUtils.exchangeForString(myName,friendName,value);
-        if (client != null) {
-            client.send(serverObject.toString());
-            ChatMessage messageObject = new ChatMessage(null,value,"ME");
-            chatMessages.add(messageObject);
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (adapter != null) {
-                        adapter.notifyDataSetChanged();
-                    } else {
-                        setAdapter();
-                    }
-                    chatText.setText("");
-                }
-            });
+        String value;
+        if(capturedImage != null) {
+            value = ImageUtils.getStringImage(capturedImage);
+            String UUID = java.util.UUID.randomUUID().toString()+System.currentTimeMillis();
+            JSONObject serverObject = JSONUtils.exchangeImageForString(myName,friendName,UUID);
+            if (client != null) {
+                client.send(serverObject.toString());
+                ChatMessage messageObject = new ChatMessage(true,UUID,"ME");
+                chatMessages.add(messageObject);
+            }
+            ImageUtils.SaveBitmap(context.getCacheDir().getAbsolutePath(), UUID, Bitmap.createBitmap(capturedImage));
+            callVolley(UUID,value);
         }
+        else {
+            value = chatText.getText().toString();
+            JSONObject serverObject = JSONUtils.exchangeForString(myName,friendName,value);
+            if (client != null) {
+                client.send(serverObject.toString());
+                ChatMessage messageObject = new ChatMessage(false, value, "ME");
+                chatMessages.add(messageObject);
+            }
+        }
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (adapter != null) {
+                    adapter.notifyDataSetChanged();
+                } else {
+                    setAdapter();
+                }
+                capturedImage = null;
+                capturePicture.setBackgroundResource(R.drawable.click);
+                chatText.setText("");
+            }
+        });
 
         /*RetrieveChatData chatpush = new RetrieveChatData(myName, friend, "POST");
 
@@ -224,6 +302,38 @@ public class TalkToFriendActivity extends AppCompatActivity {
         capturePicture.setBackgroundResource(R.drawable.click);
         chatpush.execute(params);*/
     }
+
+    private void callVolley(final String uuid, final String value) {
+        Log.v("Volley",value);
+        StringRequest request = new StringRequest(Request.Method.POST, END_POINT_URL+"postImage",
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e("Login Failed", "Please try again");
+                    }
+        }){
+            @Override
+            public String getBodyContentType() {
+                return "application/x-www-form-urlencoded; charset=UTF-8";
+            }
+
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("uuid", uuid);
+                params.put("image", value);
+                return params;
+            }
+        };
+        RequestQueue queue = Volley.newRequestQueue(TalkToFriendActivity.this);
+        queue.add(request);
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == CAMERA_REQUEST_INTENT && resultCode == Activity.RESULT_OK) {
@@ -242,6 +352,11 @@ public class TalkToFriendActivity extends AppCompatActivity {
         if(capturedImage != null) {
             capturePicture.setBackgroundResource(R.drawable.click3);
         }
+        adapter = null;
+        listChatMessagesView.setAdapter(null);
+        chatMessages = new ArrayList<ChatMessage>();
+        setWebSockets();
+
     }
 
     private void setWebSockets() {
@@ -252,7 +367,6 @@ public class TalkToFriendActivity extends AppCompatActivity {
             @Override
             public void onConnect() {
                 Log.d("TAG", "connection opened");
-
             }
 
             /**
@@ -261,10 +375,8 @@ public class TalkToFriendActivity extends AppCompatActivity {
             @Override
             public void onMessage(final String message) {
                 Log.d("TAG", String.format("Got string message! %s", message));
-
                 if(message == null || message.length() == 0)
                     return;
-                //Toast.makeText(getApplicationContext(),message,Toast.LENGTH_LONG);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -273,40 +385,41 @@ public class TalkToFriendActivity extends AppCompatActivity {
                             final RelativeLayout chatClick = (RelativeLayout) findViewById(R.id.chatWindow);
                             final ImageView expandedImageView = (ImageView) findViewById(
                                     R.id.expanded_image);
-
                             adapter = new ManageChatMessages(friendDP, myDP, getApplicationContext(), R.layout.chat_message, chatMessages, chatClick, expandedImageView);
                             listChatMessagesView.setAdapter(adapter);
-                            //test
                             classify.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
                                     adapter = new ManageChatMessages(friendDP, myDP, TalkToFriendActivity.this, R.layout.chat_message, chatMessages, chatClick, expandedImageView,true);
                                     Log.d("TAG","checking stuff");
                                     listChatMessagesView.setAdapter(adapter);
-
-
                                 }
                             });
-
-                            //adapter.notifyDataSetChanged();
                         }
                         else{
+                            ChatMessage chm = null;
                             JSONObject object = getJSONObject(message);
-                            String value = "";
+                            if(object == null)
+                                return;
                             try {
-                                value = object.getString("value");
-                                ChatMessage message1 = new ChatMessage(null,value,"HIM");
-                                chatMessages.add(message1);
+                                String mime = object.getString("MIME");
+                                String value = object.getString("value");
+
+                                if ("PIC".equals(mime)) {
+                                    chm = new ChatMessage(true,value,"HIM");
+                                }
+                                else{
+                                    chm = new ChatMessage(false,value,"HIM");
+                                }
+                                chatMessages.add(chm);
                                 adapter.notifyDataSetChanged();
                             }
                             catch (Exception e) {
-
                                 Log.e(TAG,"error in updating incoming message",e.fillInStackTrace());
                             }
                         }
                     }
                 });
-
             }
 
             @Override
@@ -335,8 +448,8 @@ public class TalkToFriendActivity extends AppCompatActivity {
 
             @Override
             public void onError(Exception error) {
-                Log.e("TAG", "Error! : " + error.getMessage());
-                Log.e("TAG","err",error.fillInStackTrace());
+                Log.e(TAG, "Error! : " + error.getMessage());
+                Log.e(TAG,"err",error.fillInStackTrace());
 
                // showToast("Error! : " + error);
             }
@@ -376,15 +489,28 @@ public class TalkToFriendActivity extends AppCompatActivity {
         }
             int size = array.length();
             for (int i = 0; i < size; i++) {
-                ChatMessage item = null;
+                ChatMessage chm = null;
                 try {
                     JSONObject object = array.getJSONObject(i);
                     String data = object.getString("value");
                     if (data != null && data.length() < 100) {
+                        String mime = object.getString("MIME");
+                        String value = object.getString("value");
+
                         if (myName.equalsIgnoreCase(object.getString("sender"))) {
-                            item = new ChatMessage(null, data, "ME");
+                            if ("PIC".equals(mime)) {
+                                chm = new ChatMessage(true,value,"ME");
+                            }
+                            else{
+                                chm = new ChatMessage(false,value,"ME");
+                            }
                         } else {
-                            item = new ChatMessage(null, data, "HIM");
+                            if ("PIC".equals(mime)) {
+                                chm = new ChatMessage(true,value,"HIM");
+                            }
+                            else{
+                                chm = new ChatMessage(false,value,"HIM");
+                            }
                         }
                     } else {
                         /*Bitmap chatImage = ImageUtils.getBitmapFromBase64(data);
@@ -397,7 +523,7 @@ public class TalkToFriendActivity extends AppCompatActivity {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                chatMessages.add(item);
+                chatMessages.add(chm);
             }
 
             if (adapter != null) {
