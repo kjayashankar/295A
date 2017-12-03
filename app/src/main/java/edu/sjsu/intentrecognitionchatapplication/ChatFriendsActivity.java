@@ -1,5 +1,6 @@
 package edu.sjsu.intentrecognitionchatapplication;
 
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -133,11 +134,12 @@ public class ChatFriendsActivity extends AppCompatActivity {
                 //PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, null , 0);
 
                 //mBuilder.setContentIntent(pendingIntent);
-
+                mBuilder.setPriority(NotificationCompat.PRIORITY_HIGH);
+                mBuilder.setAutoCancel(true);
                 mBuilder.setSmallIcon(R.drawable.classify);
                 mBuilder.setContentTitle("Message notification");
                 mBuilder.setContentText("Touch to get nearby options for "+message2.split(";")[0]);
-
+                mBuilder.setDefaults(Notification.DEFAULT_SOUND);
                 NotificationManager mNotificationManager =
 
                         (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -153,16 +155,40 @@ public class ChatFriendsActivity extends AppCompatActivity {
                 Intent i = new Intent(getApplicationContext(), TalkToFriendActivity.class);
                 i.putExtra("friend", friend);
                 i.putExtra("friendName",friend);
-                getApplicationContext().startActivity(i);
+                //getApplicationContext().startActivity(i);
 
-                PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, i, 0);
+                PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
 
                 mBuilder.setContentIntent(pendingIntent);
-
+                mBuilder.setAutoCancel(true);
+                mBuilder.setDefaults(Notification.DEFAULT_SOUND);
                 mBuilder.setSmallIcon(R.drawable.classify);
                 mBuilder.setContentTitle("Message notification");
                 mBuilder.setContentText("You have a message from "+friend);
+                mBuilder.setPriority(NotificationCompat.PRIORITY_HIGH);
+                NotificationManager mNotificationManager =
+                        (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                mNotificationManager.notify(001, mBuilder.build());
+            }
+            else if(message.startsWith("4")) {
+                String message2 = message.substring(1);
+                String friend = message2.split(";")[1];
+                NotificationCompat.Builder mBuilder =
+                        new NotificationCompat.Builder(getApplicationContext());
+                Intent i = new Intent(getApplicationContext(), TalkToFriendActivity.class);
+                i.putExtra("friend", friend);
+                i.putExtra("friendName",friend);
+                //getApplicationContext().startActivity(i);
 
+                PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
+
+                mBuilder.setContentIntent(pendingIntent);
+                mBuilder.setAutoCancel(true);
+                mBuilder.setDefaults(Notification.DEFAULT_SOUND);
+                mBuilder.setSmallIcon(R.drawable.classify);
+                mBuilder.setContentTitle("Message notification");
+                mBuilder.setContentText("You received a picture from "+friend);
+                mBuilder.setPriority(NotificationCompat.PRIORITY_HIGH);
                 NotificationManager mNotificationManager =
                         (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                 mNotificationManager.notify(001, mBuilder.build());
@@ -180,7 +206,6 @@ public class ChatFriendsActivity extends AppCompatActivity {
          * */
         @Override
         public void onDisconnect(int code, String reason) {
-
             String message = String.format(Locale.US,
                     "Disconnected! Code: %d Reason: %s", code, reason);
         }

@@ -96,7 +96,7 @@ public class TalkToFriendActivity extends AppCompatActivity {
         // debug override natural behavior and test
         myName = "Jayashankar Karnam";
 
-      /*  myName  = "Chat Friend2";
+        /*myName  = "Chat Friend2";
         friendName = "Jayashankar Karnam";
         //friendName  = "Chat Friend2";
         friend = "Jayashankar Karnam";*/

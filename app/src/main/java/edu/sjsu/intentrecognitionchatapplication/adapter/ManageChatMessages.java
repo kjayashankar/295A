@@ -23,11 +23,9 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -35,13 +33,11 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import edu.sjsu.intentrecognitionchatapplication.R;
 import edu.sjsu.intentrecognitionchatapplication.data.ChatMessage;
-import edu.sjsu.intentrecognitionchatapplication.data.Friend;
 import edu.sjsu.intentrecognitionchatapplication.utils.Constants;
 import edu.sjsu.intentrecognitionchatapplication.utils.ImageUtils;
 import edu.sjsu.intentrecognitionchatapplication.websockets.ClassificationFragment;
@@ -53,23 +49,26 @@ import static com.facebook.FacebookSdk.getApplicationContext;
  * Created by jay on 11/7/17.
  */
 
-public class ManageChatMessages extends ArrayAdapter<ChatMessage> implements ClassifyDialogFragment.Listener,ClassificationFragment.ClassifyListener{
+public class ManageChatMessages extends ArrayAdapter<ChatMessage> implements ClassifyDialogFragment.Listener,ClassificationFragment.ClassifyListener {
 
+    interface Callback {
+        void execute();
+    }
     Bitmap friendDP = null;
     Bitmap myDP = null;
     final RelativeLayout chatClick;
     final ImageView expandedImageView;
-    private HashMap<String,Bitmap> imageCache = new HashMap<String,Bitmap>();
+    private HashMap<String, Bitmap> imageCache = new HashMap<String, Bitmap>();
     Context context;
     private Animator mCurrentAnimator;
     private int mShortAnimationDuration;
     private volatile List<ChatMessage> items;
-    boolean flag=false;
-    private String selectedMessage=null;
-    private static String END_POINT_URL="http://"+ Constants.HOST_NAME+":"+Constants.PORT+"/IntentChatServer/service/friendsPage/";
+    boolean flag = false;
+    private String selectedMessage = null;
+    private static String END_POINT_URL = "http://" + Constants.HOST_NAME + ":" + Constants.PORT + "/IntentChatServer/service/friendsPage/";
 
-    public ManageChatMessages(Bitmap friendDP,Bitmap myDP, Context context, int resourceId,
-                                    List<ChatMessage> items,View chatClick,ImageView expandedImageView) {
+    public ManageChatMessages(Bitmap friendDP, Bitmap myDP, Context context, int resourceId,
+                              List<ChatMessage> items, View chatClick, ImageView expandedImageView) {
         super(context, resourceId, items);
         this.items = items;
         this.friendDP = friendDP;
@@ -78,9 +77,10 @@ public class ManageChatMessages extends ArrayAdapter<ChatMessage> implements Cla
         this.chatClick = (RelativeLayout) chatClick;
         this.expandedImageView = expandedImageView;
     }
+
     //classify mode
-    public ManageChatMessages(Bitmap friendDP,Bitmap myDP, Activity context, int resourceId,
-                              List<ChatMessage> items,View chatClick,ImageView expandedImageView,boolean flag) {
+    public ManageChatMessages(Bitmap friendDP, Bitmap myDP, Activity context, int resourceId,
+                              List<ChatMessage> items, View chatClick, ImageView expandedImageView, boolean flag) {
         super(context, resourceId, items);
         this.items = items;
         this.friendDP = friendDP;
@@ -88,7 +88,7 @@ public class ManageChatMessages extends ArrayAdapter<ChatMessage> implements Cla
         this.context = context;
         this.chatClick = (RelativeLayout) chatClick;
         this.expandedImageView = expandedImageView;
-        this.flag=true;
+        this.flag = true;
     }
 
 
@@ -99,90 +99,111 @@ public class ManageChatMessages extends ArrayAdapter<ChatMessage> implements Cla
         TextView chatText;
         TextView chatTextLeft;
         Button selectMessage;
+        ProgressBar pgBar;
 
     }
 
     public View getView(final int position, View convertView, ViewGroup parent) {
 
-           ViewHolder holder = null;
-           final ChatMessage rowItem = getItem(position);
-           LayoutInflater mInflater = (LayoutInflater) context
-                   .getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
-           if (convertView == null) {
-               convertView = mInflater.inflate(R.layout.chat_message, null);
-               holder = new ViewHolder();
-               holder.chatText = (TextView) convertView.findViewById(R.id.chat_text);
-               holder.displayPicture = (ImageView) convertView.findViewById(R.id.icon);
-               holder.chatTextLeft = (TextView) convertView.findViewById(R.id.chat_text_left);
-               holder.chatPictureLeft = (ImageView) convertView.findViewById(R.id.chat_image_left);
-               holder.chatPicture = (ImageView) convertView.findViewById(R.id.chat_image);
-               convertView.setTag(holder);
-               holder.selectMessage=(Button)  convertView.findViewById(R.id.select);
-               holder.selectMessage.setVisibility(View.GONE);
-           } else
-               holder = (ViewHolder) convertView.getTag();
-           if (rowItem != null) {
-               if (rowItem.getUser().equalsIgnoreCase("ME")) {
-                   RelativeLayout.LayoutParams paramsImage = (RelativeLayout.LayoutParams) holder.displayPicture.getLayoutParams();
-                   paramsImage.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
-                   holder.displayPicture.setLayoutParams(paramsImage);
-                   holder.displayPicture.setImageBitmap(myDP);
-                   if (rowItem.isChatImage()) {
-                       final Bitmap image = ImageUtils.getImage(context,rowItem.getChatText());
-                       if(image != null) {
-                           holder.chatPictureLeft.setImageBitmap(image);
-                           holder.chatPictureLeft.setOnClickListener(new View.OnClickListener() {
-                               @Override
-                               public void onClick(View v) {
-                                   zoomImageFromThumb(v, image, expandedImageView, chatClick);
-                               }
-                           });
-                       }
-                       else {
-                           holder.chatPictureLeft.setImageResource(R.drawable.download);
-                           holder.chatPictureLeft.setOnClickListener(new View.OnClickListener() {
-                               @Override
-                               public void onClick(View v) {
-                                   new DownloadImageTask().execute(rowItem.getChatText());                               }
-                           });
-                       }
-                   }
-                   else{
-                       holder.chatTextLeft.setText(rowItem.getChatText());
-                   }
-               } else {
-                   if (rowItem.isChatImage()) {
-                       final Bitmap image = ImageUtils.getImage(context,rowItem.getChatText());
-                       if(image != null) {
-                           holder.chatPicture.setImageBitmap(image);
-                           holder.chatPicture.setOnClickListener(new View.OnClickListener() {
-                               @Override
-                               public void onClick(View v) {
-                                   zoomImageFromThumb(v, image, expandedImageView, chatClick);
-                               }
-                           });
-                       }
-                       else {
-                           holder.chatPicture.setImageBitmap(image);
-                           holder.chatPicture.setOnClickListener(new View.OnClickListener() {
-                               @Override
-                               public void onClick(View v) {
-                                   new DownloadImageTask().execute(rowItem.getChatText());
-                               }
-                           });
-                       }
-                   }
-                   else {
-                       holder.chatText.setText(rowItem.getChatText());
-                   }
-               }
-           }
-           return convertView;
+        ViewHolder holder = null;
+        final ChatMessage rowItem = getItem(position);
+        LayoutInflater mInflater = (LayoutInflater) context
+                .getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
+        if (convertView == null) {
+            convertView = mInflater.inflate(R.layout.chat_message, null);
+            holder = new ViewHolder();
+            holder.chatText = (TextView) convertView.findViewById(R.id.chat_text);
+            holder.displayPicture = (ImageView) convertView.findViewById(R.id.icon);
+            holder.chatTextLeft = (TextView) convertView.findViewById(R.id.chat_text_left);
+            holder.chatPictureLeft = (ImageView) convertView.findViewById(R.id.chat_image_left);
+            holder.chatPicture = (ImageView) convertView.findViewById(R.id.chat_image);
+            convertView.setTag(holder);
+            holder.selectMessage = (Button) convertView.findViewById(R.id.select);
+            holder.selectMessage.setVisibility(View.GONE);
+
+            holder.pgBar = (ProgressBar) convertView.findViewById(R.id.progressBar);
+            holder.pgBar.setMax(25);
+            holder.pgBar.setVisibility(View.GONE);
+
+        } else
+            holder = (ViewHolder) convertView.getTag();
+        if (rowItem != null) {
+            if (rowItem.getUser().equalsIgnoreCase("ME")) {
+                RelativeLayout.LayoutParams paramsImage = (RelativeLayout.LayoutParams) holder.displayPicture.getLayoutParams();
+                paramsImage.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
+                holder.displayPicture.setLayoutParams(paramsImage);
+                holder.displayPicture.setImageBitmap(myDP);
+                if (rowItem.isChatImage()) {
+                    final Bitmap image = ImageUtils.getImage(context, rowItem.getChatText());
+                    if (image != null) {
+                        holder.chatPictureLeft.setImageBitmap(image);
+                        holder.chatPictureLeft.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                zoomImageFromThumb(v, image, expandedImageView, chatClick);
+                            }
+                        });
+                    } else {
+                        final ProgressBar pgfBar = holder.pgBar;
+                        holder.chatPictureLeft.setImageResource(R.drawable.download);
+                        holder.chatPictureLeft.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                new DownloadImageTask(
+                                        new Callback(){
+                                            @Override
+                                            public void execute(){
+                                                ManageChatMessages.this.notifyDataSetChanged();
+                                            }
+                                        }
+                                        ,pgfBar) .execute(rowItem.getChatText());
+                            }
+                        });
+                    }
+                } else {
+                    holder.chatTextLeft.setText(rowItem.getChatText());
+                }
+            } else {
+                if (rowItem.isChatImage()) {
+                    final Bitmap image = ImageUtils.getImage(context, rowItem.getChatText());
+                    if (image != null) {
+                        holder.chatPicture.setImageBitmap(image);
+                        holder.chatPicture.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                zoomImageFromThumb(v, image, expandedImageView, chatClick);
+                            }
+                        });
+                    } else {
+                        final ProgressBar pgfBar = holder.pgBar;
+
+                        holder.chatPicture.setImageResource(R.drawable.download);
+                        holder.chatPicture.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                new DownloadImageTask(
+                                        new Callback(){
+                                            @Override
+                                            public void execute(){
+                                                ManageChatMessages.this.notifyDataSetChanged();
+                                            }
+                                        }
+                                ,pgfBar ).execute(rowItem.getChatText());
+                            }
+                        });
+                    }
+                } else {
+                    holder.chatText.setText(rowItem.getChatText());
+                }
+            }
+        }
+        return convertView;
 
     }
+
     @Override
     public void onOkay(boolean result) {
-        if(result){
+        if (result) {
             Log.d("TAG", String.format("result of selected item is %s", selectedMessage));
             final FragmentManager fm = ((AppCompatActivity) context).getSupportFragmentManager();
             ClassificationFragment classifyFragment = new ClassificationFragment();
@@ -190,18 +211,18 @@ public class ManageChatMessages extends ArrayAdapter<ChatMessage> implements Cla
             classifyFragment.setListener(ManageChatMessages.this);
             classifyFragment.show(fm, "Alert Dialog Fragment");
         }
-
     }
+
     @Override
     public void onCancel(boolean result) {
     }
 
-    public void setSelectedMessage(String message){
-        selectedMessage=message;
+    public void setSelectedMessage(String message) {
+        selectedMessage = message;
     }
 
     @Override
-    public  void onEat(boolean result) {
+    public void onEat(boolean result) {
         System.out.println("eat selected " + " for" + selectedMessage);
         // /updateCorpus/{classification}/{sentence}
         if (result) {
@@ -209,7 +230,7 @@ public class ManageChatMessages extends ArrayAdapter<ChatMessage> implements Cla
 
                 @Override
                 public void run() {
-                    try  {
+                    try {
                         //Your code goes here
                         StringBuilder value = new StringBuilder();
                         try {
@@ -239,7 +260,7 @@ public class ManageChatMessages extends ArrayAdapter<ChatMessage> implements Cla
     }
 
     @Override
-    public  void onNotEat(boolean result) {
+    public void onNotEat(boolean result) {
         System.out.println("no eat selected " + " for" + selectedMessage);
         if (result) {
             Thread thread = new Thread(new Runnable() {
@@ -263,6 +284,7 @@ public class ManageChatMessages extends ArrayAdapter<ChatMessage> implements Cla
             });
         }
     }
+
     @Override
     public int getViewTypeCount() {
         return this.items.size();
@@ -274,7 +296,7 @@ public class ManageChatMessages extends ArrayAdapter<ChatMessage> implements Cla
         // /return position;
     }
 
-    private void zoomImageFromThumb(final View thumbView, Bitmap imageResId,final ImageView expandedImageView,final RelativeLayout chatClick) {
+    private void zoomImageFromThumb(final View thumbView, Bitmap imageResId, final ImageView expandedImageView, final RelativeLayout chatClick) {
         // If there's an animation in progress, cancel it
         // immediately and proceed with this one.
         if (mCurrentAnimator != null) {
@@ -381,7 +403,7 @@ public class ManageChatMessages extends ArrayAdapter<ChatMessage> implements Cla
                         .ofFloat(expandedImageView, View.X, startBounds.left))
                         .with(ObjectAnimator
                                 .ofFloat(expandedImageView,
-                                        View.Y,startBounds.top))
+                                        View.Y, startBounds.top))
                         .with(ObjectAnimator
                                 .ofFloat(expandedImageView,
                                         View.SCALE_X, startScaleFinal))
@@ -410,35 +432,65 @@ public class ManageChatMessages extends ArrayAdapter<ChatMessage> implements Cla
             }
         });
     }
-}
 
-class DownloadImageTask extends AsyncTask<String, Integer, Drawable>{
 
-    private static String END_POINT_URL="http://"+ Constants.HOST_NAME+":"+Constants.PORT+"/IntentChatServer/service/friendsPage/";
+    class DownloadImageTask extends AsyncTask<String, Integer, Drawable> {
 
-    @Override
-    protected Drawable doInBackground(String... strings) {
+        //private String END_POINT_URL = "http://" + Constants.HOST_NAME + ":" + Constants.PORT + "/IntentChatServer/service/friendsPage/";
 
-        StringBuilder result = new StringBuilder();
-        try {
-            URL url = new URL(END_POINT_URL + "getImage/" + strings[0]);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
-            BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            String line;
-            while ((line = rd.readLine()) != null) {
-                result.append(line);
+        private String TAG = "DownlaodImagheData";
+        Callback callback;
+        ProgressBar pgBar;
+
+        public DownloadImageTask(Callback callback, ProgressBar pgBar){
+            this.callback = callback;
+            this.pgBar = pgBar;
+        }
+
+        @Override
+        protected Drawable doInBackground(String... strings) {
+
+            StringBuilder result = new StringBuilder();
+            try {
+                URL url = new URL(END_POINT_URL + "getImage/" + strings[0]);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                String line;
+                while ((line = rd.readLine()) != null) {
+                    result.append(line);
+                }
+                rd.close();
+                Log.d("ImageDownloader", result.toString());
+                JSONObject obj = new JSONObject(result.toString());
+                ImageUtils.SaveBitmapFromString(getApplicationContext(), strings[0], obj.getString("image"));
+
+            } catch (Exception e) {
+                Log.e("ImageDownloader", e.getMessage(), e);
             }
-            rd.close();
-            Log.d("ImageDownloader",result.toString());
-            JSONObject obj = new JSONObject(result.toString());
-            ImageUtils.SaveBitmapFromString(getApplicationContext(),strings[0], obj.getString("image"));
 
-        }
-        catch(Exception e){
-            Log.e("ImageDownloader",e.getMessage(),e);
+            return null;
         }
 
-        return null;
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values);
+            Log.d(TAG,values[0]+"");
+            pgBar.setProgress(values[0]);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            pgBar.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected void onPostExecute(Drawable drawable) {
+            super.onPostExecute(drawable);
+            Log.d(TAG,"done");
+            pgBar.setVisibility(View.GONE);
+            callback.execute();
+        }
     }
 }
