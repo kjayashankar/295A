@@ -22,13 +22,12 @@
                 android:layout_height="45dp"
                 android:layout_weight="9"
                 android:id="@+id/searchText"/>
-            <Button
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_weight=".5"
-                android:text="S"
+            <ImageView
+                android:layout_height="45dp"
+                android:layout_width="45dp"
+                android:background="@drawable/search"
                 android:id="@+id/search_button"
-                android:textSize="15dp"/>
+                />
         </LinearLayout>
 
     <LinearLayout

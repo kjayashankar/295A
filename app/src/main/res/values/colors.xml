@@ -8,4 +8,6 @@
     <color name="fill">#fafb9d</color>
     <color name="fillhighlight">#b1b222</color>
     <color name="lightgreen">#B4EEB4</color>
+    <color name="activity_background">#232530</color>
+
 </resources>

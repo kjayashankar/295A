@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -59,7 +60,7 @@ public class ManageFriendsActivity extends AppCompatActivity {
         final TextView friendVanilla = (TextView) findViewById(R.id.friendVanilla);
         final TextView friendRequests = (TextView) findViewById(R.id.friendRequests);
         final TextView friendConfirmations = (TextView) findViewById(R.id.friendConfirmations);
-        final Button searchButton = (Button) findViewById(R.id.search_button);
+        final ImageView searchButton = (ImageView) findViewById(R.id.search_button);
         searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

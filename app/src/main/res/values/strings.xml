@@ -5,4 +5,5 @@
     <string name="login_password">Password</string>
     <string name="facebook_app_id">340366323100771</string>
     <string name="fb_login_protocol_scheme">fb340366323100771</string>
+    <string name="title_activity_restaraunt">RestarauntActivity</string>
 </resources>

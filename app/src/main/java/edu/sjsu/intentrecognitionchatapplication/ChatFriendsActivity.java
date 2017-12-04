@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.view.View;
+import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -17,26 +18,36 @@ import android.widget.ListView;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import javax.security.auth.callback.Callback;
+
 import edu.sjsu.intentrecognitionchatapplication.adapter.ManageChatFriendsAdapter;
+import edu.sjsu.intentrecognitionchatapplication.adapter.RestarauntsAdapter;
 import edu.sjsu.intentrecognitionchatapplication.data.ChatMessage;
 import edu.sjsu.intentrecognitionchatapplication.data.Friend;
+import edu.sjsu.intentrecognitionchatapplication.data.Restaurant;
 import edu.sjsu.intentrecognitionchatapplication.utils.Constants;
+import edu.sjsu.intentrecognitionchatapplication.utils.YelpService;
 import edu.sjsu.intentrecognitionchatapplication.websockets.WebSocketClient;
+import okhttp3.Call;
+import okhttp3.Response;
 
 public class ChatFriendsActivity extends AppCompatActivity {
 
     private List<Friend> mFriendList = null;
     private ListView listActiveFriends;
+
     private String myName = "Jayashankar Karnam";
     //private String myName = "Chat Friend2";
 
     private WebSocketClient client = null;
     private static final String TAG = "ChatFriendsActivity";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +55,11 @@ public class ChatFriendsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_chat_friends);
         listActiveFriends = (ListView) findViewById(R.id.listView);
         listActiveFriends.setDescendantFocusability(ListView.FOCUS_BLOCK_DESCENDANTS);
+        //test
+
+        Intent intent = new Intent(getApplicationContext(), RestarauntActivity.class);
+        startActivity(intent);
+
     }
 
     @Override
@@ -58,7 +74,7 @@ public class ChatFriendsActivity extends AppCompatActivity {
             }
         });
         if(client==null) {
-            setNotificationSocket();
+            //setNotificationSocket();
         }
     }
 
@@ -126,8 +142,8 @@ public class ChatFriendsActivity extends AppCompatActivity {
                 String message2 = message.substring(1);
                 NotificationCompat.Builder mBuilder =
                         new NotificationCompat.Builder(getApplicationContext());
-               /* Intent i = new Intent(getApplicationContext(), TalkToFriendActivity.class);
-                i.putExtra("friend", message2.split(";")[1]);
+               Intent i = new Intent(getApplicationContext(), RestarauntActivity.class);
+               /* i.putExtra("friend", message2.split(";")[1]);
                 i.putExtra("friendName",message2.split(";")[1]);
                 getApplicationContext().startActivity(i);*/
 
@@ -153,11 +169,15 @@ public class ChatFriendsActivity extends AppCompatActivity {
                 NotificationCompat.Builder mBuilder =
                         new NotificationCompat.Builder(getApplicationContext());
                 Intent i = new Intent(getApplicationContext(), TalkToFriendActivity.class);
-                i.putExtra("friend", friend);
+                    i.putExtra("friend", friend);
                 i.putExtra("friendName",friend);
+
                 //getApplicationContext().startActivity(i);
 
                 PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
+
+
+                getApplicationContext().startActivity(i);
 
                 mBuilder.setContentIntent(pendingIntent);
                 mBuilder.setAutoCancel(true);
@@ -192,6 +212,8 @@ public class ChatFriendsActivity extends AppCompatActivity {
                 NotificationManager mNotificationManager =
                         (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                 mNotificationManager.notify(001, mBuilder.build());
+
+
             }
         }
 
@@ -221,4 +243,9 @@ public class ChatFriendsActivity extends AppCompatActivity {
     }, null);
         client.connect();
     }
+
+
+
 }
+
+
