@@ -33,7 +33,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ChatFriendsActivity"
+            android:name=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -45,6 +45,8 @@
         <activity android:name=".LoginActivity" />
         <activity android:name=".UserProfileActivity" />
         <activity android:name=".SignupActivity" />
+        <activity android:name=".ChatFriendsActivity"/>
+        <activity android:name=".RestarauntActivity"/>
     </application>
 
 </manifest>

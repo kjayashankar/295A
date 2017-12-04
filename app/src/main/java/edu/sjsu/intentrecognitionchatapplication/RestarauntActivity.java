@@ -29,8 +29,6 @@ public class RestarauntActivity extends AppCompatActivity {
         restarauntsView=(ListView) findViewById(R.id.restarauntView);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_restaraunt);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
         getRestaurants("Biryani","SanJose");
     }
 
