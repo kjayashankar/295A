@@ -134,8 +134,12 @@ public class ChatFriendsActivity extends AppCompatActivity {
                             JSONObject object;
                             try {
                                 object = array.getJSONObject(size);
+                                String picURL = "";
+                                if (object.has("picURL")) {
+                                    picURL = object.getString("picURL");
+                                }
                                 mFriendList.add(new Friend(object.getString("name"), object.getString("value"),
-                                        object.getString("picURL")));
+                                        picURL));
                             } catch (Exception e) {
                             }
                         }

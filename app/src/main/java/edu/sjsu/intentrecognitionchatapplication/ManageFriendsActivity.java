@@ -154,8 +154,13 @@ public class ManageFriendsActivity extends AppCompatActivity {
                             int i = 0;
                             while(i < size ) {
                                 JSONObject obj = array.getJSONObject(i);
+                                String picURL = "";
+                                if (obj.has("picURL")) {
+                                    picURL = obj.getString("picURL");
+                                }
+
                                 friends.add(new Friend(obj.getString("name"),"false",
-                                        obj.getString("picURL")));
+                                        picURL));
                                 i++;
                             }
                         }
