@@ -21,6 +21,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -42,7 +43,9 @@ public class ChatFriendsActivity extends AppCompatActivity {
     private List<Friend> mFriendList = null;
     private ListView listActiveFriends;
 
-    private String myName = "Jayashankar Karnam";
+    private static String myName = "";
+    private static String email = "";
+    private static String picURL = "";
     //private String myName = "Chat Friend2";
 
     private WebSocketClient client = null;
@@ -56,6 +59,11 @@ public class ChatFriendsActivity extends AppCompatActivity {
         listActiveFriends = (ListView) findViewById(R.id.listView);
         listActiveFriends.setDescendantFocusability(ListView.FOCUS_BLOCK_DESCENDANTS);
         //test
+
+        HashMap<String, String> user = SessionManager.getSession(getApplicationContext()).getUserDetails();
+        myName = user.get(SessionManager.NAME);
+        email = user.get(SessionManager.EMAIL);
+        picURL = user.get(SessionManager.PHOTO_URL);
 
         Intent intent = new Intent(getApplicationContext(), RestarauntActivity.class);
         startActivity(intent);
@@ -126,7 +134,8 @@ public class ChatFriendsActivity extends AppCompatActivity {
                             JSONObject object;
                             try {
                                 object = array.getJSONObject(size);
-                                mFriendList.add(new Friend(object.getString("name"), object.getString("value")));
+                                mFriendList.add(new Friend(object.getString("name"), object.getString("value"),
+                                        object.getString("picURL")));
                             } catch (Exception e) {
                             }
                         }

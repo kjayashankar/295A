@@ -19,6 +19,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import edu.sjsu.intentrecognitionchatapplication.adapter.ManageFriendsAdapter;
@@ -30,12 +31,18 @@ public class ManageFriendsActivity extends AppCompatActivity {
     private static String END_POINT_URL="http://"+ Constants.HOST_NAME+":"+Constants.PORT+"/IntentChatServer/service/friendsPage/";
     List<Friend> friends;
     String method = "";
-    private static String myName = "Jayashankar+Karnam";
+    private static String myName = "";
+    private static String email = "";
+    private static String picURL = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_manage_friends);
+        HashMap<String, String> user = SessionManager.getSession(getApplicationContext()).getUserDetails();
+        myName = user.get(SessionManager.NAME);
+        email = user.get(SessionManager.EMAIL);
+        picURL = user.get(SessionManager.PHOTO_URL);
     }
 
     @Override
@@ -147,7 +154,8 @@ public class ManageFriendsActivity extends AppCompatActivity {
                             int i = 0;
                             while(i < size ) {
                                 JSONObject obj = array.getJSONObject(i);
-                                friends.add(new Friend(obj.getString("name")));
+                                friends.add(new Friend(obj.getString("name"),"false",
+                                        obj.getString("picURL")));
                                 i++;
                             }
                         }
@@ -181,7 +189,8 @@ public class ManageFriendsActivity extends AppCompatActivity {
                             int i = 0;
                             while(i < size ) {
                                 JSONObject obj = array.getJSONObject(i);
-                                friends.add(new Friend(obj.getString("name")));
+                                friends.add(new Friend(obj.getString("name"),"false",
+                                        obj.getString("picURL")));
                                 i++;
                             }
                         }
@@ -215,7 +224,8 @@ public class ManageFriendsActivity extends AppCompatActivity {
                             int i = 0;
                             while(i < size ) {
                                 JSONObject obj = array.getJSONObject(i);
-                                friends.add(new Friend(obj.getString("name")));
+                                friends.add(new Friend(obj.getString("name"),"false",
+                                        obj.getString("picURL")));
                                 i++;
                             }
                         }
@@ -249,7 +259,8 @@ public class ManageFriendsActivity extends AppCompatActivity {
                             int i = 0;
                             while(i < size ) {
                                 JSONObject obj = array.getJSONObject(i);
-                                friends.add(new Friend(obj.getString("name")));
+                                friends.add(new Friend(obj.getString("name"),"false",
+                                        obj.getString("picURL")));
                                 i++;
                             }
                         }

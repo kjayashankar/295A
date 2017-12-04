@@ -10,17 +10,24 @@ public class Friend {
 
     private String read;
 
+    private String picURL;
+
     public String getName(){
         return name;
     }
 
-    public Friend(String name, String read){
+    public Friend(String name, String read, String picURL){
         this.name = name;
         this.read = read;
+        this.picURL = picURL;
     }
 
-    public Friend(String name) {
+    /*public Friend(String name) {
         this.name = name;
+    }*/
+
+    public String getPic(){
+        return this.picURL;
     }
 
     public boolean isRead(){

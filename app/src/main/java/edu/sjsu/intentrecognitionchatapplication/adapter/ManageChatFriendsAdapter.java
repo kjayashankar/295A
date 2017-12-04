@@ -3,6 +3,7 @@ package edu.sjsu.intentrecognitionchatapplication.adapter;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +14,7 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 import edu.sjsu.intentrecognitionchatapplication.R;
 import edu.sjsu.intentrecognitionchatapplication.TalkToFriendActivity;
 import edu.sjsu.intentrecognitionchatapplication.data.Friend;
@@ -36,6 +38,7 @@ public class ManageChatFriendsAdapter extends ArrayAdapter<Friend> {
     /*private view holder class*/
     private class ViewHolder {
         TextView name;
+        CircleImageView image;
         //LinearLayout layout;
     }
 
@@ -49,13 +52,24 @@ public class ManageChatFriendsAdapter extends ArrayAdapter<Friend> {
             convertView = mInflater.inflate(R.layout.friend_individual, null);
             holder = new ViewHolder();
             holder.name = (TextView) convertView.findViewById(R.id.friend_name);
+            holder.image = (CircleImageView) convertView.findViewById(R.id.image);
+
             //LinearLayout layout = (LinearLayout) convertView.findViewById(R.id.friend_layout);
-            if (!rowItem.isRead())
-                //holder.layout.setBackgroundColor();
-                holder.name.setBackgroundColor(context.getResources().getColor(R.color.lightgreen));
+
             convertView.setTag(holder);
         } else
             holder = (ViewHolder) convertView.getTag();
+        if (!rowItem.isRead())
+            //holder.layout.setBackgroundColor();
+            holder.name.setBackgroundColor(context.getResources().getColor(R.color.lightgreen));
+        holder.image.setBackgroundResource(R.drawable.download);
+
+        String imageURL = rowItem.getPic();
+        if(imageURL != null && imageURL.length() != 0 && !imageURL.equalsIgnoreCase("NULL")) {
+            Uri uri = Uri.parse(imageURL);
+            holder.image.setImageURI(null);
+            holder.image.setImageURI(uri);
+        }
 
         final String friendName = rowItem.getName();
         holder.name.setText(friendName);

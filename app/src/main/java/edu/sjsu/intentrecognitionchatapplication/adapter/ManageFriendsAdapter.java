@@ -3,6 +3,7 @@ package edu.sjsu.intentrecognitionchatapplication.adapter;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -10,15 +11,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 import edu.sjsu.intentrecognitionchatapplication.R;
 import edu.sjsu.intentrecognitionchatapplication.TalkToFriendActivity;
 import edu.sjsu.intentrecognitionchatapplication.data.Friend;
@@ -51,6 +56,7 @@ public class ManageFriendsAdapter extends ArrayAdapter<Friend> {
         TextView name;
         ImageButton chat;
         ImageButton level;
+        CircleImageView image;
     }
 
     public View getView(final int position, View convertView, ViewGroup parent) {
@@ -63,6 +69,7 @@ public class ManageFriendsAdapter extends ArrayAdapter<Friend> {
             convertView = mInflater.inflate(R.layout.friend_individual, null);
             holder = new ViewHolder();
             holder.name = (TextView) convertView.findViewById(R.id.friend_name);
+            holder.image = (CircleImageView) convertView.findViewById(R.id.image);
             convertView.setTag(holder);
         } else
             holder = (ViewHolder) convertView.getTag();
@@ -72,6 +79,14 @@ public class ManageFriendsAdapter extends ArrayAdapter<Friend> {
 
         final String name = rowItem.getName();
         holder.name.setText(name);
+        holder.image.setBackgroundResource(R.drawable.download);
+        String imageURL = rowItem.getPic();
+        if(imageURL != null && imageURL.length() != 0 && !imageURL.equalsIgnoreCase("NULL")) {
+            Uri uri = Uri.parse(imageURL);
+            holder.image.setImageURI(null);
+            holder.image.setImageURI(uri);
+        }
+
         if ("friends".equalsIgnoreCase(option)) {
 
             holder.name.setOnClickListener(new View.OnClickListener() {

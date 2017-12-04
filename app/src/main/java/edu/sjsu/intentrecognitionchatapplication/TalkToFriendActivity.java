@@ -63,7 +63,6 @@ public class TalkToFriendActivity extends AppCompatActivity {
     private Bitmap capturedImage = null;
     Bitmap friendDP = null;
     Bitmap myDP = null;
-    String myName = "";
     String friendName = "";
     private Context context= null;
     private EditText chatText = null;
@@ -78,6 +77,9 @@ public class TalkToFriendActivity extends AppCompatActivity {
     WebSocketClient client = null;
     private boolean isInitialized = false;
     ManageChatMessages adapter = null;
+    private static String myName = "";
+    private static String email = "";
+    private static String picURL = "";
     private static String END_POINT_URL="http://"+ Constants.HOST_NAME+":"+Constants.PORT+"/IntentChatServer/service/friendsPage/";
 
 
@@ -100,6 +102,11 @@ public class TalkToFriendActivity extends AppCompatActivity {
         friendName = "Jayashankar Karnam";
         //friendName  = "Chat Friend2";
         friend = "Jayashankar Karnam";*/
+        HashMap<String, String> user = SessionManager.getSession(getApplicationContext()).getUserDetails();
+        myName = user.get(SessionManager.NAME);
+        email = user.get(SessionManager.EMAIL);
+        picURL = user.get(SessionManager.PHOTO_URL);
+
         friendText = (TextView)findViewById(R.id.Friend);
         if(friendName == null || friendName.length() == 0)
             friendName = "Chat Friend2";
