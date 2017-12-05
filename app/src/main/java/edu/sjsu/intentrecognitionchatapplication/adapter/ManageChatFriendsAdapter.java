@@ -3,7 +3,10 @@ package edu.sjsu.intentrecognitionchatapplication.adapter;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +15,8 @@ import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -67,8 +72,9 @@ public class ManageChatFriendsAdapter extends ArrayAdapter<Friend> {
         String imageURL = rowItem.getPic();
         if(imageURL != null && imageURL.length() != 0 && !imageURL.equalsIgnoreCase("NULL")) {
             Uri uri = Uri.parse(imageURL);
-            holder.image.setImageURI(null);
-            holder.image.setImageURI(uri);
+            final CircleImageView view = holder.image;
+            new DownloadDisplayPicture(view,uri).execute();
+            //holder.image.setImageURI(uri);
         }
 
         final String friendName = rowItem.getName();
@@ -87,5 +93,40 @@ public class ManageChatFriendsAdapter extends ArrayAdapter<Friend> {
 
 
         return convertView;
+    }
+
+    class DownloadDisplayPicture extends AsyncTask<Void,Void,Void>{
+
+        private CircleImageView image;
+        private Uri uri;
+        Bitmap bitmap;
+
+        public DownloadDisplayPicture(CircleImageView image, Uri uri) {
+            this.image = image;
+            this.uri = uri;
+        }
+        @Override
+        protected Void doInBackground(Void... voids) {
+
+
+            InputStream image_stream = null;
+            try {
+                image_stream = context.getContentResolver().openInputStream(uri);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+
+            bitmap= BitmapFactory.decodeStream(image_stream );
+
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            if (bitmap != null)
+                image.setImageBitmap(bitmap);
+        }
     }
 }
