@@ -28,9 +28,9 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.android.support:appcompat-v7:27.0.1'
+    compile 'com.android.support:appcompat-v7:27.0.2'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
-    compile 'com.android.support:design:25.3.1'
+    compile 'com.android.support:design:27.0.2'
     compile 'com.google.android.gms:play-services-auth:9.8.0'
     compile 'com.github.bumptech.glide:glide:3.7.0'
     compile 'com.facebook.android:facebook-login:[4,5)'
@@ -40,18 +40,8 @@ dependencies {
     compile 'com.squareup.okhttp3:okhttp:3.2.0'
     compile 'me.spark:submitbutton:1.0.1'
     testCompile 'junit:junit:4.12'
+    compile 'com.android.support:support-vector-drawable:27.0.2'
 }
 
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.android.application'
-repositories {
-    google()
-}
-buildscript {
-    repositories {
-        maven {
-            url 'https://maven.google.com/'
-            name 'Google'
-        }
-    }
-}

@@ -8,7 +8,7 @@ import edu.sjsu.intentrecognitionchatapplication.BuildConfig;
 
 public class Constants {
 
-    public static final String HOST_NAME = "10.0.0.25";
+    public static final String HOST_NAME = "10.0.0.98";
 
     public static final int PORT = 8080;
     public static final String YELP_TOKEN = BuildConfig.YELP_TOKEN;

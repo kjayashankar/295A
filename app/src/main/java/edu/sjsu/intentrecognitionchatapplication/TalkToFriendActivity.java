@@ -96,14 +96,14 @@ public class TalkToFriendActivity extends AppCompatActivity {
             //update the name on toolbar
         }
         // debug override natural behavior and test
-        myName = "Jayashankar Karnam";
+        myName = "medarametla sreekar";
 
         /*myName  = "Chat Friend2";
         friendName = "Jayashankar Karnam";
         //friendName  = "Chat Friend2";
         friend = "Jayashankar Karnam";*/
         HashMap<String, String> user = SessionManager.getSession(getApplicationContext()).getUserDetails();
-        myName = user.get(SessionManager.NAME);
+        //myName = user.get(SessionManager.NAME);
         email = user.get(SessionManager.EMAIL);
         picURL = user.get(SessionManager.PHOTO_URL);
 
@@ -367,7 +367,8 @@ public class TalkToFriendActivity extends AppCompatActivity {
     }
 
     private void setWebSockets() {
-        String path = "http://"+ Constants.HOST_NAME+":"+Constants.PORT+"/IntentChatServer/chat?from="+myName+"&to="+friendName;
+        String path = "http://"+ Constants.HOST_NAME+":"+Constants.PORT+"/IntentChatServer/chat?from="+myName.replaceAll(" ","\\+")+"&" +
+                "to="+friendName.replaceAll(" ","\\+");
 
         Log.d(TAG,path);
         client = new WebSocketClient(URI.create(path.replaceAll(" ","+")), new WebSocketClient.Listener() {

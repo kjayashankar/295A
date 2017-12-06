@@ -5,9 +5,9 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.Adapter;
@@ -43,7 +43,7 @@ public class ChatFriendsActivity extends AppCompatActivity {
     private List<Friend> mFriendList = null;
     private ListView listActiveFriends;
 
-    private static String myName = "";
+    private static String myName = "medarametla sreekar";
     private static String email = "";
     private static String picURL = "";
     //private String myName = "Chat Friend2";
@@ -61,12 +61,12 @@ public class ChatFriendsActivity extends AppCompatActivity {
         //test
 
         HashMap<String, String> user = SessionManager.getSession(getApplicationContext()).getUserDetails();
-        myName = user.get(SessionManager.NAME);
+        //myName = user.get(SessionManager.NAME);
         email = user.get(SessionManager.EMAIL);
         picURL = user.get(SessionManager.PHOTO_URL);
 
-        Intent intent = new Intent(getApplicationContext(), RestarauntActivity.class);
-        startActivity(intent);
+        /*Intent intent = new Intent(getApplicationContext(), RestarauntActivity.class);
+        startActivity(intent);*/
 
     }
 
@@ -81,9 +81,8 @@ public class ChatFriendsActivity extends AppCompatActivity {
                 //startActivity(i);
             }
         });
-        if(client==null) {
-            //setNotificationSocket();
-        }
+        setNotificationSocket();
+
     }
 
     @Override

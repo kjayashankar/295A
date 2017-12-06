@@ -15,6 +15,10 @@ import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.facebook.AccessToken;
+
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.List;
@@ -57,7 +61,7 @@ public class ManageChatFriendsAdapter extends ArrayAdapter<Friend> {
             convertView = mInflater.inflate(R.layout.friend_individual, null);
             holder = new ViewHolder();
             holder.name = (TextView) convertView.findViewById(R.id.friend_name);
-            holder.image = (CircleImageView) convertView.findViewById(R.id.image);
+            holder.image = (CircleImageView) convertView.findViewById(R.id.friend_dp);
 
             //LinearLayout layout = (LinearLayout) convertView.findViewById(R.id.friend_layout);
 
@@ -72,8 +76,10 @@ public class ManageChatFriendsAdapter extends ArrayAdapter<Friend> {
         String imageURL = rowItem.getPic();
         if(imageURL != null && imageURL.length() != 0 && !imageURL.equalsIgnoreCase("NULL")) {
             Uri uri = Uri.parse(imageURL);
-            final CircleImageView view = holder.image;
-            new DownloadDisplayPicture(view,uri).execute();
+            if( AccessToken.getCurrentAccessToken() == null)
+                Glide.with(context).load(uri).into(holder.image);
+            else
+                Glide.with(context).load(uri).diskCacheStrategy(DiskCacheStrategy.SOURCE).into(holder.image);
             //holder.image.setImageURI(uri);
         }
 

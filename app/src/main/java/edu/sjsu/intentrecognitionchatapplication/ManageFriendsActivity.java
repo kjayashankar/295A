@@ -1,8 +1,8 @@
 package edu.sjsu.intentrecognitionchatapplication;
 
 import android.os.StrictMode;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -31,7 +31,7 @@ public class ManageFriendsActivity extends AppCompatActivity {
     private static String END_POINT_URL="http://"+ Constants.HOST_NAME+":"+Constants.PORT+"/IntentChatServer/service/friendsPage/";
     List<Friend> friends;
     String method = "";
-    private static String myName = "";
+    private static String myName = "medarametla+sreekar";
     private static String email = "";
     private static String picURL = "";
 
@@ -40,7 +40,7 @@ public class ManageFriendsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_manage_friends);
         HashMap<String, String> user = SessionManager.getSession(getApplicationContext()).getUserDetails();
-        myName = user.get(SessionManager.NAME);
+        //myName = user.get(SessionManager.NAME);
         email = user.get(SessionManager.EMAIL);
         picURL = user.get(SessionManager.PHOTO_URL);
     }

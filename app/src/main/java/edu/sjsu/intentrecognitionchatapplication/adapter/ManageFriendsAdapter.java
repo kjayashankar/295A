@@ -16,6 +16,10 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.facebook.AccessToken;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -29,6 +33,7 @@ import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import edu.sjsu.intentrecognitionchatapplication.R;
+import edu.sjsu.intentrecognitionchatapplication.SessionManager;
 import edu.sjsu.intentrecognitionchatapplication.TalkToFriendActivity;
 import edu.sjsu.intentrecognitionchatapplication.data.Friend;
 import edu.sjsu.intentrecognitionchatapplication.utils.Constants;
@@ -73,7 +78,7 @@ public class ManageFriendsAdapter extends ArrayAdapter<Friend> {
             convertView = mInflater.inflate(R.layout.friend_individual, null);
             holder = new ViewHolder();
             holder.name = (TextView) convertView.findViewById(R.id.friend_name);
-            holder.image = (CircleImageView) convertView.findViewById(R.id.image);
+            holder.image = (CircleImageView) convertView.findViewById(R.id.friend_dp);
             convertView.setTag(holder);
         } else
             holder = (ViewHolder) convertView.getTag();
@@ -87,8 +92,13 @@ public class ManageFriendsAdapter extends ArrayAdapter<Friend> {
         String imageURL = rowItem.getPic();
         if(imageURL != null && imageURL.length() != 0 && !imageURL.equalsIgnoreCase("NULL")) {
             Uri uri = Uri.parse(imageURL);
-            final CircleImageView view = holder.image;
-            new DownloadDisplayPicture(view,uri).execute();
+            /*final CircleImageView view = holder.image;
+            new DownloadDisplayPicture(view,uri).execute();*/
+            if( AccessToken.getCurrentAccessToken() == null)
+                Glide.with(context).load(uri).into(holder.image);
+            else
+                Glide.with(context).load(uri).diskCacheStrategy(DiskCacheStrategy.SOURCE).into(holder.image);
+
             //holder.image.setImageURI(uri);
         }
 
