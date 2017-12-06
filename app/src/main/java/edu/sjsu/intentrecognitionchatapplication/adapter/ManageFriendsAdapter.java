@@ -3,6 +3,8 @@ package edu.sjsu.intentrecognitionchatapplication.adapter;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -15,6 +17,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URI;
@@ -83,8 +87,9 @@ public class ManageFriendsAdapter extends ArrayAdapter<Friend> {
         String imageURL = rowItem.getPic();
         if(imageURL != null && imageURL.length() != 0 && !imageURL.equalsIgnoreCase("NULL")) {
             Uri uri = Uri.parse(imageURL);
-            holder.image.setImageURI(null);
-            holder.image.setImageURI(uri);
+            final CircleImageView view = holder.image;
+            new DownloadDisplayPicture(view,uri).execute();
+            //holder.image.setImageURI(uri);
         }
 
         if ("friends".equalsIgnoreCase(option)) {
@@ -145,6 +150,41 @@ public class ManageFriendsAdapter extends ArrayAdapter<Friend> {
         }
         return convertView;
     }
+
+    class DownloadDisplayPicture extends AsyncTask<Void,Void,Void>{
+
+        private CircleImageView image;
+        private Uri uri;
+        Bitmap bitmap;
+
+        public DownloadDisplayPicture(CircleImageView image, Uri uri) {
+            this.image = image;
+            this.uri = uri;
+        }
+        @Override
+        protected Void doInBackground(Void... voids) {
+
+
+            InputStream image_stream = null;
+            try {
+                image_stream = context.getContentResolver().openInputStream(uri);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+
+            bitmap= BitmapFactory.decodeStream(image_stream );
+
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            if (bitmap != null)
+                image.setImageBitmap(bitmap);
+        }
+    }
 }
 
 class FriendOperation extends AsyncTask<Void,Map,Void>{
@@ -177,4 +217,6 @@ class FriendOperation extends AsyncTask<Void,Map,Void>{
         }
         return null;
     }
+
+
 }
