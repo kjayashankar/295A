@@ -65,7 +65,7 @@ public class ManageChatMessages extends ArrayAdapter<ChatMessage> implements Cla
     private volatile List<ChatMessage> items;
     boolean flag = false;
     private String selectedMessage = null;
-    private static String END_POINT_URL = "http://" + Constants.HOST_NAME + ":" + Constants.PORT + "/IntentChatServer/service/friendsPage/";
+    private static String END_POINT_URL = Constants.HOST_BASE_URL+ "/IntentChatServer/service/friendsPage/";
 
     public ManageChatMessages(Bitmap friendDP, Bitmap myDP, Context context, int resourceId,
                               List<ChatMessage> items, View chatClick, ImageView expandedImageView) {

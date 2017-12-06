@@ -44,7 +44,7 @@ import edu.sjsu.intentrecognitionchatapplication.utils.Constants;
 
 public class ManageFriendsAdapter extends ArrayAdapter<Friend> {
 
-    private static final String END_POINT_URL = "http://"+ Constants.HOST_NAME+":"+Constants.PORT+"/IntentChatServer/service/friendsPage/";
+    private static final String END_POINT_URL = Constants.HOST_BASE_URL+"/IntentChatServer/service/friendsPage/";
 
     private static final String TAG = "ManageFriendsAdapter";
     private Context context;

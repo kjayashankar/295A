@@ -61,7 +61,7 @@ public class ChatFriendsActivity extends AppCompatActivity {
         //test
 
         HashMap<String, String> user = SessionManager.getSession(getApplicationContext()).getUserDetails();
-        //myName = user.get(SessionManager.NAME);
+        myName = user.get(SessionManager.NAME);
         email = user.get(SessionManager.EMAIL);
         picURL = user.get(SessionManager.PHOTO_URL);
 
