@@ -45,8 +45,8 @@
         <activity android:name=".LoginActivity" />
         <activity android:name=".UserProfileActivity" />
         <activity android:name=".SignupActivity" />
-        <activity android:name=".ChatFriendsActivity"/>
-        <activity android:name=".RestarauntActivity"/>
+        <activity android:name=".ChatFriendsActivity"  android:theme="@style/AppTheme.NoActionBar"/>
+        <activity android:name=".RestarauntActivity" android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
 </manifest>

@@ -109,7 +109,7 @@
             android:text="Chat"
             android:textColor="@color/white"
             android:id="@+id/chat_button"
-            android:textSize="12sp"
+            android:textSize="15sp"
             app:sub_btn_duration="2000"
             app:sub_btn_ripple_color="@color/colorPrimary"
             app:sub_btn_tick_color="@color/white" />
@@ -120,9 +120,9 @@
             app:sub_btn_tick_color="@color/white"
             android:id="@+id/profile"
             android:text="Profile"
-            android:textSize="13.5sp"
+            android:textSize="15sp"
             android:textColor="@color/white"
-            app:sub_btn_duration="3000" />
+            app:sub_btn_duration="2000" />
 
         <com.spark.submitbutton.SubmitButton
             android:id="@+id/Friends"
@@ -130,8 +130,8 @@
             android:layout_height="match_parent"
             android:text="Friends"
             android:textColor="@color/white"
-            android:textSize="18sp"
-            app:sub_btn_duration="4000" />
+            android:textSize="15sp"
+            app:sub_btn_duration="2000" />
 </LinearLayout>
 
     </android.support.design.widget.CoordinatorLayout>
