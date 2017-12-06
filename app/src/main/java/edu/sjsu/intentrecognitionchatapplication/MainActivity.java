@@ -17,12 +17,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        SessionManager.getSession(getApplicationContext()).checkLogin();
     }
 
 
 
     @Override
     protected void onResume() {
+        SessionManager.getSession(getApplicationContext()).checkLogin();
         super.onResume();
         com.spark.submitbutton.SubmitButton chatActivity=(com.spark.submitbutton.SubmitButton) findViewById(R.id.chat_button);
         chatActivity.setOnClickListener(new View.OnClickListener() {

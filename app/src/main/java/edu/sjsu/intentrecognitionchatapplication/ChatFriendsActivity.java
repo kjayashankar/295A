@@ -95,7 +95,7 @@ public class ChatFriendsActivity extends AppCompatActivity {
     }
 
     private void setNotificationSocket(){
-        String path = "http://"+ Constants.HOST_NAME+":"+Constants.PORT+"/IntentChatServer/notification?from="+myName.replaceAll(" ","\\+");
+        String path = Constants.HOST_BASE_URL+"/IntentChatServer/notification?from="+myName.replaceAll(" ","\\+");
 
         Log.d(TAG,path);
         client = new WebSocketClient(URI.create(path.replaceAll(" ","+")), new WebSocketClient.Listener() {

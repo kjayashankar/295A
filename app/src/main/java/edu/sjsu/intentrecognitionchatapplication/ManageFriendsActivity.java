@@ -28,7 +28,7 @@ import edu.sjsu.intentrecognitionchatapplication.utils.Constants;
 
 public class ManageFriendsActivity extends AppCompatActivity {
 
-    private static String END_POINT_URL="http://"+ Constants.HOST_NAME+":"+Constants.PORT+"/IntentChatServer/service/friendsPage/";
+    private static String END_POINT_URL=Constants.HOST_BASE_URL+"/IntentChatServer/service/friendsPage/";
     List<Friend> friends;
     String method = "";
     private static String myName = "medarametla+sreekar";

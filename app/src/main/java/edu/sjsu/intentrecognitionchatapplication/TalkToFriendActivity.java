@@ -80,7 +80,7 @@ public class TalkToFriendActivity extends AppCompatActivity {
     private static String myName = "";
     private static String email = "";
     private static String picURL = "";
-    private static String END_POINT_URL="http://"+ Constants.HOST_NAME+":"+Constants.PORT+"/IntentChatServer/service/friendsPage/";
+    private static String END_POINT_URL=Constants.HOST_BASE_URL+"/IntentChatServer/service/friendsPage/";
 
 
     @Override
@@ -367,7 +367,7 @@ public class TalkToFriendActivity extends AppCompatActivity {
     }
 
     private void setWebSockets() {
-        String path = "http://"+ Constants.HOST_NAME+":"+Constants.PORT+"/IntentChatServer/chat?from="+myName.replaceAll(" ","\\+")+"&" +
+        String path = Constants.HOST_BASE_URL+"/IntentChatServer/chat?from="+myName.replaceAll(" ","\\+")+"&" +
                 "to="+friendName.replaceAll(" ","\\+");
 
         Log.d(TAG,path);

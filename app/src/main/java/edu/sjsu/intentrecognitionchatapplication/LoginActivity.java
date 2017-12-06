@@ -45,6 +45,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import edu.sjsu.intentrecognitionchatapplication.utils.Constants;
+
 /**
  * Created by satya on 10/14/17.
  */
@@ -61,8 +63,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     public static AlertDialog.Builder alertBuilder;
     public static SessionManager session;
 
-    public static final String REGISTER_ENDPOINT_URL = "https://00a6de62.ngrok.io/IntentChatServer/service/friendsPage/registerUser";
-    public static final String AUTHENTICATE_ENDPOINT_URL = "https://00a6de62.ngrok.io/IntentChatServer/service/friendsPage/authenticateUser";
+    public static final String REGISTER_ENDPOINT_URL = Constants.HOST_BASE_URL + "/IntentChatServer/service/friendsPage/registerUser";
+    public static final String AUTHENTICATE_ENDPOINT_URL = Constants.HOST_BASE_URL + "/IntentChatServer/service/friendsPage/authenticateUser";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -149,7 +151,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                             showAlert("Login Failed", "Incorrect Username/Password", LoginActivity.this);
                         else{
                             session.createLoginSession(response, userName, null, true);
-                            Intent intent = new Intent(getApplicationContext(), UserProfileActivity.class);
+                            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                             startActivity(intent);
                             Toast.makeText(getApplicationContext(), "Logging In..", Toast.LENGTH_SHORT).show();
                         }
@@ -271,7 +273,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     @Override
                     public void onResponse(String response) {
                         session.createLoginSession(name, email, picURL, false);
-                        Intent intent = new Intent(getApplicationContext(), UserProfileActivity.class);
+                        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                         startActivity(intent);
                         Toast.makeText(getApplicationContext(), "Logging In..", Toast.LENGTH_SHORT).show();
                     }
