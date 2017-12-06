@@ -51,6 +51,12 @@ public class ManageChatFriendsAdapter extends ArrayAdapter<Friend> {
         //LinearLayout layout;
     }
 
+    @Override
+    public boolean isEnabled(int position)
+    {
+        return true;
+    }
+
     public View getView(final int position, View convertView, ViewGroup parent) {
         ViewHolder holder = null;
         Friend rowItem = getItem(position);
@@ -96,43 +102,19 @@ public class ManageChatFriendsAdapter extends ArrayAdapter<Friend> {
                 context.startActivity(i);
             }
         });
+        holder.image.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("Onclick chat","myname : "+myName+"::"+friendName);
+
+                Intent i = new Intent(context, TalkToFriendActivity.class);
+                i.putExtra("friend", friendName);
+                i.putExtra("friendName",friendName);
+                context.startActivity(i);
+            }
+        });
 
 
         return convertView;
-    }
-
-    class DownloadDisplayPicture extends AsyncTask<Void,Void,Void>{
-
-        private CircleImageView image;
-        private Uri uri;
-        Bitmap bitmap;
-
-        public DownloadDisplayPicture(CircleImageView image, Uri uri) {
-            this.image = image;
-            this.uri = uri;
-        }
-        @Override
-        protected Void doInBackground(Void... voids) {
-
-
-            InputStream image_stream = null;
-            try {
-                image_stream = context.getContentResolver().openInputStream(uri);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-
-            bitmap= BitmapFactory.decodeStream(image_stream );
-
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            if (bitmap != null)
-                image.setImageBitmap(bitmap);
-        }
     }
 }

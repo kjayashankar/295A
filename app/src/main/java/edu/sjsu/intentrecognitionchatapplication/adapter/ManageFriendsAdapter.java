@@ -88,7 +88,6 @@ public class ManageFriendsAdapter extends ArrayAdapter<Friend> {
 
         final String name = rowItem.getName();
         holder.name.setText(name);
-        holder.image.setBackgroundResource(R.drawable.download);
         String imageURL = rowItem.getPic();
         if(imageURL != null && imageURL.length() != 0 && !imageURL.equalsIgnoreCase("NULL")) {
             Uri uri = Uri.parse(imageURL);
@@ -100,6 +99,9 @@ public class ManageFriendsAdapter extends ArrayAdapter<Friend> {
                 Glide.with(context).load(uri).diskCacheStrategy(DiskCacheStrategy.SOURCE).into(holder.image);
 
             //holder.image.setImageURI(uri);
+        }
+        else{
+            holder.image.setBackgroundResource(R.drawable.download);
         }
 
         if ("friends".equalsIgnoreCase(option)) {

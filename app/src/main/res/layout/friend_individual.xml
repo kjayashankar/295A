@@ -4,6 +4,10 @@
      android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
+    android:clickable="false"
+    android:descendantFocusability="blocksDescendants"
+    android:focusable="false"
+    android:focusableInTouchMode="false"
     >
         <de.hdodenhof.circleimageview.CircleImageView
             android:layout_width="40dp"
@@ -11,7 +15,10 @@
             android:layout_gravity="center_vertical"
             android:id="@+id/friend_dp"
             app:civ_border_width="2dp"
-            app:civ_border_color="#ff000000" />
+            app:civ_border_color="#ff000000"
+            android:clickable="false"
+            android:focusable="false"
+            android:focusableInTouchMode="false"/>
 
 
         <TextView
@@ -24,7 +31,10 @@
             android:id="@+id/friend_name"
             android:paddingBottom="15dp"
             android:paddingTop="15dp"
-            android:text="wassup" />
+            android:text="wassup"
+            android:clickable="false"
+            android:focusable="false"
+            android:focusableInTouchMode="false"/>
 
 
         <ImageButton
@@ -37,7 +47,8 @@
             android:id="@+id/showChat"
             android:paddingBottom="15dp"
             android:paddingTop="15dp"
-            android:paddingRight="10dp" />
+            android:paddingRight="10dp"
+            />
 
         <ImageButton
             android:layout_gravity="center_vertical"

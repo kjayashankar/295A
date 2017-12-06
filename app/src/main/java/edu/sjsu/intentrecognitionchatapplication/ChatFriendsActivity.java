@@ -81,7 +81,8 @@ public class ChatFriendsActivity extends AppCompatActivity {
                 //startActivity(i);
             }
         });
-        setNotificationSocket();
+        if (client == null)
+            setNotificationSocket();
 
     }
 
@@ -140,10 +141,12 @@ public class ChatFriendsActivity extends AppCompatActivity {
                                 mFriendList.add(new Friend(object.getString("name"), object.getString("value"),
                                         picURL));
                             } catch (Exception e) {
+                                Log.e("ERR",e.getMessage(),e.fillInStackTrace());
                             }
                         }
                         ManageChatFriendsAdapter adapter = new ManageChatFriendsAdapter(getApplicationContext(), R.layout.chat_list_item, mFriendList, "");
                         listActiveFriends.setAdapter(adapter);
+                        adapter.notifyDataSetChanged();
                         //listActiveFriends.setOnItemClickListener(ChatFriendsActivity.this);
 
                     }

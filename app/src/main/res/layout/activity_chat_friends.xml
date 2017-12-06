@@ -65,13 +65,6 @@
             android:layout_alignParentLeft="true"
             android:layout_below="@id/textbar1"
             android:id="@+id/listView"/>
-        <!--< test here>-->
-        <ListView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_alignParentLeft="true"
-            android:layout_below="@id/textbar1"
-            android:id="@+id/restarauntView"/>
 
     </RelativeLayout>
 
